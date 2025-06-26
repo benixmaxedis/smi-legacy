@@ -1,0 +1,2641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speedy Maths Enhanced - PIXI.js Edition</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        #gameContainer {
+            position: relative;
+            background: linear-gradient(180deg, #0a0a2e, #16213e);
+            border: 3px solid #4a90e2;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        
+        #gameCanvas {
+            display: block;
+            cursor: crosshair;
+            border-radius: 12px;
+        }
+        
+        .screen-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 46, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+            color: white;
+            z-index: 1000;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        h1 {
+            font-size: 48px;
+            color: #4a90e2;
+            margin: 0 0 20px 0;
+            text-shadow: 0 0 20px rgba(74, 144, 226, 0.5);
+        }
+        
+        h2 {
+            font-size: 32px;
+            color: #8bb6f0;
+            margin: 0 0 20px 0;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 20px;
+            background: linear-gradient(45deg, #4a90e2, #357abd);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(74, 144, 226, 0.3);
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.5);
+        }
+        
+        .instructions {
+            max-width: 500px;
+            text-align: center;
+            margin: 20px 0;
+            color: #b8d4f0;
+            line-height: 1.8;
+        }
+        
+        #ui {
+            display: none;
+        }
+        
+        #shopButton {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 3px 15px rgba(243, 156, 18, 0.4);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        #shopButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(243, 156, 18, 0.6);
+        }
+        
+        .shop-container {
+            background: rgba(20, 20, 60, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #4a90e2;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .shop-item {
+            background: rgba(40, 40, 80, 0.8);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 1px solid #6ba3f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .shop-item-info {
+            flex: 1;
+        }
+        
+        .shop-item-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4a90e2;
+            margin-bottom: 5px;
+        }
+        
+        .shop-item-description {
+            font-size: 14px;
+            color: #b8d4f0;
+            margin-bottom: 10px;
+        }
+        
+        .shop-item-price {
+            font-size: 16px;
+            color: #f39c12;
+            font-weight: bold;
+        }
+        
+        .shop-item button {
+            padding: 8px 16px;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .shop-item button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .currency-display {
+            font-size: 20px;
+            color: #f39c12;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        #answerInput {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px;
+            font-size: 18px;
+            border: 2px solid #4a90e2;
+            border-radius: 8px;
+            width: 120px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 15px rgba(74, 144, 226, 0.3);
+            z-index: 100;
+        }
+        
+        .weapon-display {
+            display: none;
+        }
+        
+        #statsPanel {
+            width: 300px;
+            background: linear-gradient(180deg, #0a0a2e, #16213e);
+            border: 3px solid #4a90e2;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            color: white;
+            padding: 20px;
+            height: fit-content;
+        }
+        
+        .stats-title {
+            color: #4a90e2;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(74, 144, 226, 0.8);
+        }
+        
+        .stats-section {
+            margin-bottom: 20px;
+            background: rgba(40, 40, 80, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #6ba3f0;
+        }
+        
+        .stats-section-title {
+            color: #8bb6f0;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #6ba3f0;
+            padding-bottom: 5px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            color: #b8d4f0;
+        }
+        
+        .stat-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stat-value {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        
+        .enemy-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .add-icon { background: #4CAF50; }
+        .sub-icon { background: #f44336; }
+        .mult-icon { background: #ff9800; }
+        .div-icon { background: #9c27b0; }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="gameCanvas"></div>
+        
+        <div id="startScreen" class="screen-overlay">
+            <h1>🚀 Speedy Maths Enhanced</h1>
+            <div class="instructions">
+                <p><strong>How to play:</strong></p>
+                <p>• Move your ship with the mouse</p>
+                <p>• Left click to fire weapons</p>
+                <p>• Type numbers and right click to fire answer missiles</p>
+                <p>• Destroy math aliens with correct answers!</p>
+                <p>• Collect coins to upgrade your weapons in the shop!</p>
+                <p>• Press SPACE to pause</p>
+            </div>
+            <button onclick="startGame()">Launch Mission</button>
+        </div>
+        
+        <div id="gameOverScreen" class="screen-overlay hidden">
+            <h2>Mission Complete!</h2>
+            <p id="finalScore"></p>
+            <button onclick="restartGame()">New Mission</button>
+        </div>
+        
+        <div id="pauseScreen" class="screen-overlay hidden">
+            <h2>⏸️ PAUSED</h2>
+            <p style="font-size: 18px; text-align: center; margin: 20px 0;">Press SPACE to resume</p>
+        </div>
+        
+        <div id="levelCompleteScreen" class="screen-overlay hidden">
+            <div class="shop-container">
+                <h2 style="text-align: center; margin-bottom: 20px;">🎯 Level Complete!</h2>
+                
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h3 style="color: #4a90e2; margin-bottom: 15px;">Level <span id="completedLevel">1</span> Summary</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div style="background: rgba(40, 40, 80, 0.6); padding: 10px; border-radius: 8px;">
+                            <div style="color: #f39c12; font-weight: bold;">Enemies Defeated</div>
+                            <div style="color: #ffffff; font-size: 20px;" id="levelEnemiesKilled">0</div>
+                        </div>
+                        <div style="background: rgba(40, 40, 80, 0.6); padding: 10px; border-radius: 8px;">
+                            <div style="color: #f39c12; font-weight: bold;">Coins Collected</div>
+                            <div style="color: #ffffff; font-size: 20px;" id="levelCoinsCollected">0</div>
+                        </div>
+                        <div style="background: rgba(40, 40, 80, 0.6); padding: 10px; border-radius: 8px;">
+                            <div style="color: #f39c12; font-weight: bold;">Math Accuracy</div>
+                            <div style="color: #ffffff; font-size: 20px;" id="levelAccuracy">0%</div>
+                        </div>
+                        <div style="background: rgba(40, 40, 80, 0.6); padding: 10px; border-radius: 8px;">
+                            <div style="color: #f39c12; font-weight: bold;">Time Bonus</div>
+                            <div style="color: #ffffff; font-size: 20px;" id="levelTimeBonus">+0</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(60, 60, 100, 0.8); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                        <div style="color: #4a90e2; font-weight: bold; margin-bottom: 10px;">Total Score: <span id="levelTotalScore">0</span></div>
+                        <div class="currency-display">💰 Total Coins: <span id="levelTotalCoins">0</span></div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <button onclick="openShopFromLevel()" style="margin-right: 10px;">🛒 Upgrade Ship</button>
+                        <button onclick="continueToNextLevel()">➡️ Continue</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="shopScreen" class="screen-overlay hidden">
+            <div class="shop-container">
+                <h2 style="text-align: center; margin-bottom: 20px;">🛒 Weapon Shop</h2>
+                <div class="currency-display">💰 Coins: <span id="coinDisplay">0</span></div>
+                
+                <div id="shopItems" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="shop-item">
+                        <div class="shop-item-info">
+                            <div class="shop-item-name">Rapid Fire</div>
+                            <div class="shop-item-description">+25% fire rate</div>
+                            <div class="shop-item-price">50 coins</div>
+                        </div>
+                        <button onclick="buyUpgrade('rapidFire', 50)">Buy</button>
+                    </div>
+                    
+                    <div class="shop-item">
+                        <div class="shop-item-info">
+                            <div class="shop-item-name">Double Shot</div>
+                            <div class="shop-item-description">Fire two missiles</div>
+                            <div class="shop-item-price">100 coins</div>
+                        </div>
+                        <button onclick="buyUpgrade('doubleShot', 100)">Buy</button>
+                    </div>
+                    
+                    <div class="shop-item">
+                        <div class="shop-item-info">
+                            <div class="shop-item-name">Spread Shot</div>
+                            <div class="shop-item-description">Three-way spread</div>
+                            <div class="shop-item-price">150 coins</div>
+                        </div>
+                        <button onclick="buyUpgrade('spreadShot', 150)">Buy</button>
+                    </div>
+                    
+                    <div class="shop-item">
+                        <div class="shop-item-info">
+                            <div class="shop-item-name">Laser Cannon</div>
+                            <div class="shop-item-description">Piercing laser beam</div>
+                            <div class="shop-item-price">200 coins</div>
+                        </div>
+                        <button onclick="buyUpgrade('laserCannon', 200)">Buy</button>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="closeShop()">Close Shop</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="ui" class="hidden">
+            <div>Score: <span id="score">0</span></div>
+            <div>Hull Integrity: <span id="lives">3</span></div>
+            <div>Coins: <span id="uiCoins">0</span></div>
+            <div>Level: <span id="level">1</span></div>
+            <div>Progress: <span id="levelProgress">0</span>/<span id="levelTarget">10</span></div>
+            <div style="margin-top: 10px; font-size: 14px;">Press SPACE to pause</div>
+        </div>
+        
+        
+        <div class="weapon-display hidden" id="weaponDisplay">
+            <div>Weapon: <span id="currentWeapon">Basic</span></div>
+            <div>Fire Rate: <span id="fireRateDisplay">100%</span></div>
+        </div>
+        
+        <input type="number" id="answerInput" class="hidden" placeholder="Answer" onclick="this.focus()">
+    </div>
+    
+    <div id="statsPanel">
+        <div class="stats-title">📊 Mission Stats</div>
+        
+        <div class="stats-section">
+            <div class="stats-section-title">Current Session</div>
+            <div class="stat-item">
+                <div class="stat-label">Total Score</div>
+                <div class="stat-value" id="totalScore">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Current Level</div>
+                <div class="stat-value" id="currentLevelStat">1</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Lives Remaining</div>
+                <div class="stat-value" id="livesRemaining">3</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Total Coins</div>
+                <div class="stat-value" id="totalCoins">0</div>
+            </div>
+        </div>
+        
+        <div class="stats-section">
+            <div class="stats-section-title">Enemy Kills</div>
+            <div class="stat-item">
+                <div class="stat-label">
+                    <div class="enemy-icon add-icon">+</div>
+                    Addition Enemies
+                </div>
+                <div class="stat-value" id="addKills">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">
+                    <div class="enemy-icon sub-icon">-</div>
+                    Subtraction Enemies
+                </div>
+                <div class="stat-value" id="subKills">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">
+                    <div class="enemy-icon mult-icon">×</div>
+                    Multiplication Enemies
+                </div>
+                <div class="stat-value" id="multKills">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">
+                    <div class="enemy-icon div-icon">÷</div>
+                    Division Enemies
+                </div>
+                <div class="stat-value" id="divKills">0</div>
+            </div>
+        </div>
+        
+        <div class="stats-section">
+            <div class="stats-section-title">Math Accuracy</div>
+            <div class="stat-item">
+                <div class="stat-label">Total Answers</div>
+                <div class="stat-value" id="totalAnswers">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Correct Answers</div>
+                <div class="stat-value" id="correctAnswers">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Accuracy Rate</div>
+                <div class="stat-value" id="accuracyRate">0%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Streak (Current)</div>
+                <div class="stat-value" id="currentStreak">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Best Streak</div>
+                <div class="stat-value" id="bestStreak">0</div>
+            </div>
+        </div>
+        
+        
+        <div class="stats-section">
+            <div class="stats-section-title">Dynamic Weapons</div>
+            <div class="stat-item">
+                <div class="stat-label">Active Weapon</div>
+                <div class="stat-value" id="activeWeaponType">Basic</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">
+                    <div class="enemy-icon add-icon">+</div>
+                    Spread Power
+                </div>
+                <div class="stat-value" id="addWeaponLevel">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">
+                    <div class="enemy-icon sub-icon">-</div>
+                    Rapid Power
+                </div>
+                <div class="stat-value" id="subWeaponLevel">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">
+                    <div class="enemy-icon mult-icon">×</div>
+                    Multi Power
+                </div>
+                <div class="stat-value" id="multWeaponLevel">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">
+                    <div class="enemy-icon div-icon">÷</div>
+                    Beam Power
+                </div>
+                <div class="stat-value" id="divWeaponLevel">0</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.4/pixi.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script>
+        // Game variables
+        let app;
+        let gameState = 'start';
+        let gameRunning = false;
+        let score = 0;
+        let coins = 0;
+        let lives = 3;
+        let currentLevel = 1;
+        let enemiesNeededForLevel = 5; // Even shorter levels for earlier shop access
+        let enemiesKilledThisLevel = 0;
+        let levelStartTime = 0;
+        let mouseX = 400;
+        let mouseY = 500;
+        let mouseDown = false;
+        let lastFireTime = 0;
+        let fireRate = 150;
+        
+        // Level stats tracking
+        let levelStats = {
+            enemiesKilled: 0,
+            coinsCollected: 0,
+            accuracy: 0,
+            correctAnswers: 0,
+            totalAnswers: 0,
+            timeBonus: 0
+        };
+        
+        // Global stats tracking
+        let globalStats = {
+            totalAnswers: 0,
+            correctAnswers: 0,
+            currentStreak: 0,
+            bestStreak: 0,
+            enemyKills: {
+                add: 0,
+                sub: 0,
+                mult: 0,
+                div: 0
+            }
+        };
+        
+        // Dynamic weapon system based on math operations
+        let weaponPowerLevels = {
+            add: 0,      // Addition - Spread Shot
+            sub: 0,      // Subtraction - Rapid Fire
+            mult: 0,     // Multiplication - Multi-Shot
+            div: 0       // Division - Laser Beam
+        };
+        
+        let activeWeaponType = 'basic';
+        let weaponEffectTimer = 0;
+        let weaponEffectDuration = 5000; // 5 seconds
+        
+        // Game objects
+        let player = null;
+        let missiles = [];
+        let answerMissiles = [];
+        let enemyMissiles = [];
+        let mathEnemies = [];
+        let formationEnemies = [];
+        let particles = [];
+        let coins_sprites = [];
+        let powerUps = [];
+        let bosses = [];
+        let starField = null;
+        
+        // Upgrades
+        let upgrades = {
+            rapidFire: 0,
+            doubleShot: false,
+            spreadShot: false,
+            laserCannon: false,
+            shield: false,
+            magnet: false
+        };
+        
+        // Temporary power-up effects
+        let tempEffects = {
+            rapidFire: 0,
+            multiShot: 0,
+            shield: 0
+        };
+        
+        // Spawn timers
+        let mathEnemySpawnTimer = 0;
+        let mathEnemySpawnDelay = 600;
+        let formationSpawnTimer = 0;
+        let formationSpawnDelay = 800;
+        let coinSpawnTimer = 0;
+        let coinSpawnDelay = 300;
+        
+        // Containers
+        let gameContainer;
+        let backgroundContainer;
+        let gameObjectsContainer;
+        let uiContainer;
+        let particleContainer;
+        
+        // Audio
+        let audioInitialized = false;
+        let backgroundMusic;
+        let sounds = {};
+        
+        // Initialize PIXI Application
+        function initPixi() {
+            app = new PIXI.Application({
+                width: 800,
+                height: 800, // Will be resized to match stats panel
+                backgroundColor: 0x0a0a2e,
+                antialias: true
+            });
+            
+            document.getElementById('gameCanvas').appendChild(app.view);
+            
+            // Resize game to match stats panel height after DOM loads
+            setTimeout(() => {
+                const statsPanel = document.getElementById('statsPanel');
+                const statsPanelHeight = statsPanel.offsetHeight;
+                if (statsPanelHeight > 0) {
+                    app.renderer.resize(800, statsPanelHeight);
+                }
+            }, 100);
+            
+            // Create containers for organized rendering
+            backgroundContainer = new PIXI.Container();
+            gameObjectsContainer = new PIXI.Container();
+            particleContainer = new PIXI.Container();
+            uiContainer = new PIXI.Container();
+            
+            app.stage.addChild(backgroundContainer);
+            app.stage.addChild(gameObjectsContainer);
+            app.stage.addChild(particleContainer);
+            app.stage.addChild(uiContainer);
+            
+            // Create star field
+            createStarField();
+            
+            // Initialize player
+            createPlayer();
+        }
+        
+        function createStarField() {
+            starField = new PIXI.Container();
+            
+            for (let i = 0; i < 150; i++) {
+                const star = new PIXI.Graphics();
+                star.beginFill(0xffffff);
+                star.drawCircle(0, 0, Math.random() * 2 + 0.5);
+                star.endFill();
+                
+                star.x = Math.random() * app.screen.width;
+                star.y = Math.random() * app.screen.height;
+                star.alpha = Math.random() * 0.8 + 0.2;
+                star.speed = Math.random() * 2 + 0.5;
+                
+                starField.addChild(star);
+            }
+            
+            backgroundContainer.addChild(starField);
+        }
+        
+        function createPlayer() {
+            player = new PIXI.Container();
+            
+            // Classic arcade fighter - angular, geometric design
+            const mainHull = new PIXI.Graphics();
+            mainHull.beginFill(0xffffff); // Bright white like classic arcade
+            mainHull.moveTo(0, -25); // Sharp pointed nose
+            mainHull.lineTo(-8, -15);
+            mainHull.lineTo(-8, 20);
+            mainHull.lineTo(8, 20);
+            mainHull.lineTo(8, -15);
+            mainHull.closePath();
+            mainHull.endFill();
+            
+            // Side details in blue
+            const leftDetail = new PIXI.Graphics();
+            leftDetail.beginFill(0x00bfff);
+            leftDetail.drawRect(-6, -10, 4, 25);
+            leftDetail.endFill();
+            
+            const rightDetail = new PIXI.Graphics();
+            rightDetail.beginFill(0x00bfff);
+            rightDetail.drawRect(2, -10, 4, 25);
+            rightDetail.endFill();
+            
+            // Wings - geometric and angular
+            const leftWing = new PIXI.Graphics();
+            leftWing.beginFill(0xcccccc);
+            leftWing.drawPolygon([-8, 5, -18, 8, -18, 15, -8, 12]);
+            leftWing.endFill();
+            
+            const rightWing = new PIXI.Graphics();
+            rightWing.beginFill(0xcccccc);
+            rightWing.drawPolygon([8, 5, 18, 8, 18, 15, 8, 12]);
+            rightWing.endFill();
+            
+            // Wing cannons
+            const leftCannon = new PIXI.Graphics();
+            leftCannon.beginFill(0x888888);
+            leftCannon.drawRect(-20, 10, 4, 8);
+            leftCannon.endFill();
+            
+            const rightCannon = new PIXI.Graphics();
+            rightCannon.beginFill(0x888888);
+            rightCannon.drawRect(16, 10, 4, 8);
+            rightCannon.endFill();
+            
+            // Engine block - rectangular and solid
+            const engineBlock = new PIXI.Graphics();
+            engineBlock.beginFill(0x666666);
+            engineBlock.drawRect(-6, 18, 12, 8);
+            engineBlock.endFill();
+            
+            // Engine flames - pixelated style
+            const leftFlame = new PIXI.Graphics();
+            leftFlame.beginFill(0x00ffff);
+            leftFlame.drawRect(-4, 26, 2, 8);
+            leftFlame.drawRect(-4, 34, 2, 4);
+            leftFlame.endFill();
+            leftFlame.name = 'leftFlame';
+            
+            const rightFlame = new PIXI.Graphics();
+            rightFlame.beginFill(0x00ffff);
+            rightFlame.drawRect(2, 26, 2, 8);
+            rightFlame.drawRect(2, 34, 2, 4);
+            rightFlame.endFill();
+            rightFlame.name = 'rightFlame';
+            
+            const centerFlame = new PIXI.Graphics();
+            centerFlame.beginFill(0xffff00);
+            centerFlame.drawRect(-1, 26, 2, 10);
+            centerFlame.drawRect(-1, 36, 2, 6);
+            centerFlame.endFill();
+            centerFlame.name = 'centerFlame';
+            
+            // Cockpit - simple geometric
+            const cockpit = new PIXI.Graphics();
+            cockpit.beginFill(0xff0000);
+            cockpit.drawRect(-2, -8, 4, 6);
+            cockpit.endFill();
+            
+            // Assembly
+            player.addChild(leftWing);
+            player.addChild(rightWing);
+            player.addChild(mainHull);
+            player.addChild(leftDetail);
+            player.addChild(rightDetail);
+            player.addChild(leftCannon);
+            player.addChild(rightCannon);
+            player.addChild(engineBlock);
+            player.addChild(cockpit);
+            player.addChild(leftFlame);
+            player.addChild(rightFlame);
+            player.addChild(centerFlame);
+            
+            player.x = 400;
+            player.y = 650;
+            
+            gameObjectsContainer.addChild(player);
+        }
+        
+        function createMissile(x, y, type = 'basic') {
+            const missile = new PIXI.Container();
+            
+            switch(type) {
+                case 'basic':
+                    // Plasma bolt design
+                    const core = new PIXI.Graphics();
+                    core.beginFill(0x00d4ff);
+                    core.drawEllipse(0, 0, 2, 10);
+                    core.endFill();
+                    
+                    const glow = new PIXI.Graphics();
+                    glow.beginFill(0x87ceeb, 0.6);
+                    glow.drawEllipse(0, 0, 4, 12);
+                    glow.endFill();
+                    
+                    const trail = new PIXI.Graphics();
+                    trail.beginFill(0x00bfff, 0.3);
+                    trail.drawEllipse(0, 3, 3, 8);
+                    trail.endFill();
+                    
+                    missile.addChild(trail);
+                    missile.addChild(glow);
+                    missile.addChild(core);
+                    break;
+                    
+                case 'laser':
+                    // Laser beam design
+                    const laserCore = new PIXI.Graphics();
+                    laserCore.beginFill(0xff0040);
+                    laserCore.drawRect(-1, -20, 2, 40);
+                    laserCore.endFill();
+                    
+                    const laserGlow = new PIXI.Graphics();
+                    laserGlow.beginFill(0xff4080, 0.5);
+                    laserGlow.drawRect(-2, -22, 4, 44);
+                    laserGlow.endFill();
+                    
+                    const laserOuter = new PIXI.Graphics();
+                    laserOuter.beginFill(0xff80c0, 0.2);
+                    laserOuter.drawRect(-3, -25, 6, 50);
+                    laserOuter.endFill();
+                    
+                    missile.addChild(laserOuter);
+                    missile.addChild(laserGlow);
+                    missile.addChild(laserCore);
+                    break;
+                    
+                case 'spread':
+                    // Green star-shaped projectile for addition
+                    const spreadCore = new PIXI.Graphics();
+                    spreadCore.beginFill(0x00ff00);
+                    const starPoints = [];
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (i / 8) * Math.PI * 2;
+                        const radius = i % 2 === 0 ? 4 : 2;
+                        starPoints.push(Math.cos(angle) * radius, Math.sin(angle) * radius);
+                    }
+                    spreadCore.drawPolygon(starPoints);
+                    spreadCore.endFill();
+                    
+                    const spreadGlow = new PIXI.Graphics();
+                    spreadGlow.beginFill(0x80ff80, 0.6);
+                    spreadGlow.drawCircle(0, 0, 6);
+                    spreadGlow.endFill();
+                    
+                    missile.addChild(spreadGlow);
+                    missile.addChild(spreadCore);
+                    break;
+                    
+                case 'rapid':
+                    // Red diamond-shaped projectile for subtraction
+                    const rapidCore = new PIXI.Graphics();
+                    rapidCore.beginFill(0xff0000);
+                    rapidCore.moveTo(0, -4);
+                    rapidCore.lineTo(3, 0);
+                    rapidCore.lineTo(0, 4);
+                    rapidCore.lineTo(-3, 0);
+                    rapidCore.closePath();
+                    rapidCore.endFill();
+                    
+                    const rapidGlow = new PIXI.Graphics();
+                    rapidGlow.beginFill(0xff8080, 0.6);
+                    rapidGlow.drawCircle(0, 0, 5);
+                    rapidGlow.endFill();
+                    
+                    missile.addChild(rapidGlow);
+                    missile.addChild(rapidCore);
+                    break;
+                    
+                case 'multi':
+                    // Orange hexagonal projectile for multiplication
+                    const multiCore = new PIXI.Graphics();
+                    multiCore.beginFill(0xff8000);
+                    const hexPoints = [];
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (i / 6) * Math.PI * 2;
+                        hexPoints.push(Math.cos(angle) * 3, Math.sin(angle) * 3);
+                    }
+                    multiCore.drawPolygon(hexPoints);
+                    multiCore.endFill();
+                    
+                    const multiGlow = new PIXI.Graphics();
+                    multiGlow.beginFill(0xffb366, 0.6);
+                    multiGlow.drawCircle(0, 0, 5);
+                    multiGlow.endFill();
+                    
+                    missile.addChild(multiGlow);
+                    missile.addChild(multiCore);
+                    break;
+                    
+                case 'beam':
+                    // Purple laser beam for division
+                    const beamCore = new PIXI.Graphics();
+                    beamCore.beginFill(0x8000ff);
+                    beamCore.drawRect(-1, -20, 2, 40);
+                    beamCore.endFill();
+                    
+                    const beamGlow = new PIXI.Graphics();
+                    beamGlow.beginFill(0xb366ff, 0.5);
+                    beamGlow.drawRect(-2, -22, 4, 44);
+                    beamGlow.endFill();
+                    
+                    const beamOuter = new PIXI.Graphics();
+                    beamOuter.beginFill(0xd9b3ff, 0.2);
+                    beamOuter.drawRect(-3, -25, 6, 50);
+                    beamOuter.endFill();
+                    
+                    missile.addChild(beamOuter);
+                    missile.addChild(beamGlow);
+                    missile.addChild(beamCore);
+                    break;
+            }
+            
+            missile.x = x;
+            missile.y = y;
+            missile.type = type;
+            missile.speed = (type === 'laser' || type === 'beam') ? 12 : 10;
+            
+            missiles.push(missile);
+            gameObjectsContainer.addChild(missile);
+        }
+        
+        function createAnswerMissile(x, y, answer) {
+            const missile = new PIXI.Container();
+            
+            // Smart missile body design
+            const body = new PIXI.Graphics();
+            body.beginFill(0xf39c12);
+            body.drawPolygon([0, -8, 4, 2, 2, 8, -2, 8, -4, 2]);
+            body.endFill();
+            
+            const bodyHighlight = new PIXI.Graphics();
+            bodyHighlight.beginFill(0xffd700);
+            bodyHighlight.drawPolygon([0, -6, 2, 0, 1, 6, -1, 6, -2, 0]);
+            bodyHighlight.endFill();
+            
+            // Energy field around missile
+            const energyField = new PIXI.Graphics();
+            energyField.beginFill(0xffeb3b, 0.4);
+            energyField.drawEllipse(0, 0, 8, 16);
+            energyField.endFill();
+            
+            // Answer display background
+            const answerBg = new PIXI.Graphics();
+            answerBg.beginFill(0x1e293b, 0.9);
+            answerBg.lineStyle(2, 0xffd700);
+            answerBg.drawRoundedRect(-12, -28, 24, 16, 4);
+            answerBg.endFill();
+            
+            const answerText = new PIXI.Text(answer.toString(), {
+                fontFamily: 'Arial',
+                fontSize: 12,
+                fill: 0xffd700,
+                fontWeight: 'bold'
+            });
+            answerText.anchor.set(0.5);
+            answerText.y = -20;
+            
+            missile.addChild(energyField);
+            missile.addChild(body);
+            missile.addChild(bodyHighlight);
+            missile.addChild(answerBg);
+            missile.addChild(answerText);
+            missile.x = x;
+            missile.y = y;
+            missile.answer = answer;
+            missile.speed = 8;
+            
+            answerMissiles.push(missile);
+            gameObjectsContainer.addChild(missile);
+        }
+        
+        function createMathEnemy(x, y) {
+            const problemData = generateProblem();
+            const enemy = new PIXI.Container();
+            const color = getOperationColor(problemData.operation);
+            
+            // Classic alien ship body - Space Invaders inspired
+            const body = new PIXI.Graphics();
+            body.beginFill(color);
+            // Main hexagonal body
+            body.drawPolygon([
+                0, -12,    // top
+                -8, -8,    // top left
+                -12, 0,    // left
+                -8, 12,    // bottom left
+                8, 12,     // bottom right
+                12, 0,     // right
+                8, -8      // top right
+            ]);
+            body.endFill();
+            
+            // Body detail lines
+            const bodyDetail = new PIXI.Graphics();
+            bodyDetail.lineStyle(1, getDarkerColor(color));
+            bodyDetail.moveTo(-8, -4);
+            bodyDetail.lineTo(8, -4);
+            bodyDetail.moveTo(-6, 4);
+            bodyDetail.lineTo(6, 4);
+            bodyDetail.endFill();
+            
+            // Wing sections - classic arcade style
+            const leftWing = new PIXI.Graphics();
+            leftWing.beginFill(getDarkerColor(color));
+            leftWing.drawPolygon([-12, -2, -18, 2, -16, 8, -12, 6]);
+            leftWing.endFill();
+            
+            const rightWing = new PIXI.Graphics();
+            rightWing.beginFill(getDarkerColor(color));
+            rightWing.drawPolygon([12, -2, 18, 2, 16, 8, 12, 6]);
+            rightWing.endFill();
+            
+            // Center core - glowing weak point
+            const core = new PIXI.Graphics();
+            core.beginFill(0xffff00);
+            core.drawRect(-3, -3, 6, 6);
+            core.endFill();
+            core.beginFill(0xff0000);
+            core.drawRect(-1, -1, 2, 2);
+            core.endFill();
+            
+            // Weapon pods
+            const leftWeapon = new PIXI.Graphics();
+            leftWeapon.beginFill(0x666666);
+            leftWeapon.drawRect(-20, 4, 4, 6);
+            leftWeapon.endFill();
+            
+            const rightWeapon = new PIXI.Graphics();
+            rightWeapon.beginFill(0x666666);
+            rightWeapon.drawRect(16, 4, 4, 6);
+            rightWeapon.endFill();
+            
+            // Problem display - arcade style
+            const problemBg = new PIXI.Graphics();
+            problemBg.beginFill(0x000000);
+            problemBg.lineStyle(1, color);
+            problemBg.drawRect(-25, -32, 50, 16);
+            problemBg.endFill();
+            
+            const problemText = new PIXI.Text(problemData.problem, {
+                fontFamily: 'Courier',
+                fontSize: 14,
+                fill: 0xffffff,
+                stroke: color,
+                strokeThickness: 1,
+                fontWeight: 'bold'
+            });
+            problemText.anchor.set(0.5);
+            problemText.y = -24;
+            
+            // Assembly
+            enemy.addChild(leftWing);
+            enemy.addChild(rightWing);
+            enemy.addChild(body);
+            enemy.addChild(bodyDetail);
+            enemy.addChild(leftWeapon);
+            enemy.addChild(rightWeapon);
+            enemy.addChild(core);
+            enemy.addChild(problemBg);
+            enemy.addChild(problemText);
+            
+            enemy.x = x;
+            enemy.y = y;
+            enemy.speed = 0.5 + Math.random() * 0.3;
+            enemy.problem = problemData.problem;
+            enemy.answer = problemData.answer;
+            enemy.operation = problemData.operation;
+            enemy.shootTimer = Math.random() * 300 + 100;
+            
+            mathEnemies.push(enemy);
+            gameObjectsContainer.addChild(enemy);
+        }
+        
+        function getDarkerColor(color) {
+            // Helper function to get a darker shade
+            const r = (color >> 16) & 0xFF;
+            const g = (color >> 8) & 0xFF;
+            const b = color & 0xFF;
+            return ((r * 0.7) << 16) | ((g * 0.7) << 8) | (b * 0.7);
+        }
+        
+        function createFormationEnemy(x, y) {
+            const enemy = new PIXI.Container();
+            
+            // Classic arcade enemy - inspired by Galaga
+            const body = new PIXI.Graphics();
+            body.beginFill(0x00bfff); // Bright cyan
+            // Butterfly/moth-like shape
+            body.drawPolygon([
+                0, -10,     // top center
+                -6, -8,     // top left
+                -10, -2,    // left wing top
+                -14, 4,     // left wing middle
+                -10, 10,    // left wing bottom
+                -4, 8,      // left body
+                0, 12,      // bottom center
+                4, 8,       // right body
+                10, 10,     // right wing bottom
+                14, 4,      // right wing middle
+                10, -2,     // right wing top
+                6, -8       // top right
+            ]);
+            body.endFill();
+            
+            // Wing details
+            const leftWingDetail = new PIXI.Graphics();
+            leftWingDetail.beginFill(0x0099cc);
+            leftWingDetail.drawPolygon([-8, -4, -12, 2, -8, 6, -6, 2]);
+            leftWingDetail.endFill();
+            
+            const rightWingDetail = new PIXI.Graphics();
+            rightWingDetail.beginFill(0x0099cc);
+            rightWingDetail.drawPolygon([8, -4, 12, 2, 8, 6, 6, 2]);
+            rightWingDetail.endFill();
+            
+            // Center body stripe
+            const centerStripe = new PIXI.Graphics();
+            centerStripe.beginFill(0xffffff);
+            centerStripe.drawRect(-2, -6, 4, 14);
+            centerStripe.endFill();
+            
+            // Eyes/sensors
+            const leftEye = new PIXI.Graphics();
+            leftEye.beginFill(0xff0000);
+            leftEye.drawCircle(-3, -4, 2);
+            leftEye.endFill();
+            
+            const rightEye = new PIXI.Graphics();
+            rightEye.beginFill(0xff0000);
+            rightEye.drawCircle(3, -4, 2);
+            rightEye.endFill();
+            
+            // Assembly
+            enemy.addChild(body);
+            enemy.addChild(leftWingDetail);
+            enemy.addChild(rightWingDetail);
+            enemy.addChild(centerStripe);
+            enemy.addChild(leftEye);
+            enemy.addChild(rightEye);
+            
+            enemy.x = x;
+            enemy.y = y;
+            enemy.speed = 0.6 + Math.random() * 0.4;
+            enemy.shootTimer = Math.random() * 300 + 100;
+            
+            // Add looping movement parameters
+            enemy.movementType = Math.random() < 0.5 ? 'figure8' : 'spiral';
+            enemy.centerX = x;
+            enemy.centerY = y + 150; // Target center for loops
+            enemy.angle = 0;
+            enemy.loopRadius = 80 + Math.random() * 40;
+            enemy.phase = Math.random() * Math.PI * 2; // Random starting phase
+            
+            formationEnemies.push(enemy);
+            gameObjectsContainer.addChild(enemy);
+        }
+        
+        function createCoin(x, y) {
+            const coin = new PIXI.Container();
+            
+            const coinGraphic = new PIXI.Graphics();
+            coinGraphic.beginFill(0xf39c12);
+            coinGraphic.drawEllipse(0, 0, 8, 8);
+            coinGraphic.endFill();
+            
+            const coinInner = new PIXI.Graphics();
+            coinInner.beginFill(0xffd700);
+            coinInner.drawEllipse(0, 0, 5, 5);
+            coinInner.endFill();
+            
+            coin.addChild(coinGraphic);
+            coin.addChild(coinInner);
+            coin.x = x;
+            coin.y = y;
+            coin.speed = 1;
+            coin.collectRadius = upgrades.magnet ? 60 : 30;
+            
+            coins_sprites.push(coin);
+            gameObjectsContainer.addChild(coin);
+        }
+        
+        function createExplosion(x, y, color = 0xff6464) {
+            for (let i = 0; i < 20; i++) {
+                const particle = new PIXI.Graphics();
+                
+                // Create different particle shapes
+                const particleType = Math.floor(Math.random() * 3);
+                switch(particleType) {
+                    case 0:
+                        particle.beginFill(color);
+                        particle.drawCircle(0, 0, Math.random() * 4 + 1);
+                        particle.endFill();
+                        break;
+                    case 1:
+                        particle.beginFill(color);
+                        particle.drawRect(0, 0, Math.random() * 3 + 1, Math.random() * 3 + 1);
+                        particle.endFill();
+                        break;
+                    case 2:
+                        particle.beginFill(color);
+                        particle.drawPolygon([0, -2, 2, 2, -2, 2]);
+                        particle.endFill();
+                        break;
+                }
+                
+                particle.x = x;
+                particle.y = y;
+                particle.vx = (Math.random() - 0.5) * 12;
+                particle.vy = (Math.random() - 0.5) * 12;
+                particle.rotation = Math.random() * Math.PI * 2;
+                particle.rotationSpeed = (Math.random() - 0.5) * 0.3;
+                particle.life = 1.0;
+                particle.decay = 0.015 + Math.random() * 0.01;
+                particle.gravity = 0.1;
+                
+                particles.push(particle);
+                particleContainer.addChild(particle);
+            }
+        }
+        
+        function createPowerUp(x, y, type) {
+            const powerUp = new PIXI.Container();
+            
+            let graphic = new PIXI.Graphics();
+            let glowColor = 0xffffff;
+            
+            switch(type) {
+                case 'health':
+                    graphic.beginFill(0x27ae60);
+                    graphic.drawRect(-8, -2, 16, 4);
+                    graphic.drawRect(-2, -8, 4, 16);
+                    graphic.endFill();
+                    glowColor = 0x27ae60;
+                    break;
+                case 'weaponAdd':
+                    // Green plus symbol for Addition weapon
+                    graphic.beginFill(0x00ff00);
+                    graphic.drawRect(-8, -2, 16, 4);
+                    graphic.drawRect(-2, -8, 4, 16);
+                    graphic.endFill();
+                    glowColor = 0x00ff00;
+                    break;
+                case 'weaponSub':
+                    // Red minus symbol for Subtraction weapon
+                    graphic.beginFill(0xff0000);
+                    graphic.drawRect(-8, -2, 16, 4);
+                    graphic.endFill();
+                    glowColor = 0xff0000;
+                    break;
+                case 'weaponMult':
+                    // Orange X symbol for Multiplication weapon
+                    graphic.beginFill(0xff8000);
+                    graphic.drawPolygon([-6, -6, -2, -2, -6, 2, -2, 6, 2, 2, 6, 6, 6, 2, 2, -2, 6, -6, 2, -6, -2, -2, -6, -6]);
+                    graphic.endFill();
+                    glowColor = 0xff8000;
+                    break;
+                case 'weaponDiv':
+                    // Purple division symbol for Division weapon
+                    graphic.beginFill(0x8000ff);
+                    graphic.drawRect(-6, -1, 12, 2);
+                    graphic.drawCircle(0, -5, 2);
+                    graphic.drawCircle(0, 5, 2);
+                    graphic.endFill();
+                    glowColor = 0x8000ff;
+                    break;
+                case 'rapidFire':
+                    graphic.beginFill(0xe74c3c);
+                    graphic.drawPolygon([0, -10, 8, 8, 0, 4, -8, 8]);
+                    graphic.endFill();
+                    glowColor = 0xe74c3c;
+                    break;
+                case 'multiShot':
+                    graphic.beginFill(0x8e44ad);
+                    // Draw star manually
+                    const points = [];
+                    const outerRadius = 10;
+                    const innerRadius = 5;
+                    const numPoints = 5;
+                    for (let i = 0; i < numPoints * 2; i++) {
+                        const angle = (i * Math.PI) / numPoints;
+                        const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                        points.push(Math.cos(angle) * radius, Math.sin(angle) * radius);
+                    }
+                    graphic.drawPolygon(points);
+                    graphic.endFill();
+                    glowColor = 0x8e44ad;
+                    break;
+                case 'shield':
+                    graphic.beginFill(0x3498db);
+                    graphic.drawCircle(0, 0, 8);
+                    graphic.endFill();
+                    graphic.lineStyle(2, 0x2980b9);
+                    graphic.drawCircle(0, 0, 6);
+                    glowColor = 0x3498db;
+                    break;
+            }
+            
+            // Add glow effect
+            const glow = new PIXI.Graphics();
+            glow.beginFill(glowColor, 0.3);
+            glow.drawCircle(0, 0, 15);
+            glow.endFill();
+            
+            powerUp.addChild(glow);
+            powerUp.addChild(graphic);
+            powerUp.x = x;
+            powerUp.y = y;
+            powerUp.type = type;
+            powerUp.speed = 1.5;
+            powerUp.bobSpeed = 0.05;
+            powerUp.bobOffset = 0;
+            
+            powerUps.push(powerUp);
+            gameObjectsContainer.addChild(powerUp);
+        }
+        
+        function createBoss(x, y) {
+            const boss = new PIXI.Container();
+            
+            // Boss body - larger and more intimidating
+            const body = new PIXI.Graphics();
+            body.beginFill(0x8b0000); // Dark red
+            body.drawRect(-40, -30, 80, 60);
+            body.endFill();
+            
+            // Boss details
+            const details = new PIXI.Graphics();
+            details.beginFill(0xff0000); // Bright red
+            details.drawRect(-35, -25, 70, 50);
+            details.endFill();
+            
+            // Boss weapons (spikes)
+            const weapons = new PIXI.Graphics();
+            weapons.beginFill(0x4b0000);
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2;
+                const x1 = Math.cos(angle) * 45;
+                const y1 = Math.sin(angle) * 45;
+                const x2 = Math.cos(angle) * 55;
+                const y2 = Math.sin(angle) * 55;
+                weapons.drawPolygon([x1, y1, x2, y2, x1 + 5, y1 + 5]);
+            }
+            weapons.endFill();
+            
+            // Boss core (weak point)
+            const core = new PIXI.Graphics();
+            core.beginFill(0xffd700);
+            core.drawCircle(0, 0, 15);
+            core.endFill();
+            
+            // Health bar background
+            const healthBg = new PIXI.Graphics();
+            healthBg.beginFill(0x333333);
+            healthBg.drawRect(-40, -50, 80, 8);
+            healthBg.endFill();
+            
+            // Health bar
+            const healthBar = new PIXI.Graphics();
+            healthBar.beginFill(0xff0000);
+            healthBar.drawRect(-40, -50, 80, 8);
+            healthBar.endFill();
+            healthBar.name = 'healthBar';
+            
+            boss.addChild(body);
+            boss.addChild(details);
+            boss.addChild(weapons);
+            boss.addChild(core);
+            boss.addChild(healthBg);
+            boss.addChild(healthBar);
+            
+            boss.x = x;
+            boss.y = y;
+            boss.speed = 0.5;
+            boss.health = 50;
+            boss.maxHealth = 50;
+            boss.shootTimer = 0;
+            boss.moveTimer = 0;
+            boss.direction = 1;
+            
+            bosses.push(boss);
+            gameObjectsContainer.addChild(boss);
+        }
+        
+        function createEnemyMissile(x, y) {
+            const missile = new PIXI.Container();
+            
+            const missileGraphic = new PIXI.Graphics();
+            missileGraphic.beginFill(0xe74c3c);
+            missileGraphic.drawEllipse(0, 0, 4, 10);
+            missileGraphic.endFill();
+            
+            const core = new PIXI.Graphics();
+            core.beginFill(0xff6b6b);
+            core.drawEllipse(0, 0, 2, 6);
+            core.endFill();
+            
+            missile.addChild(missileGraphic);
+            missile.addChild(core);
+            missile.x = x;
+            missile.y = y;
+            missile.speed = 4;
+            
+            enemyMissiles.push(missile);
+            gameObjectsContainer.addChild(missile);
+        }
+        
+        function getOperationColor(operation) {
+            switch(operation) {
+                case '+': return 0x27ae60;
+                case '-': return 0xe74c3c;
+                case '*': return 0x8e44ad;
+                case '/': return 0xf39c12;
+                default: return 0x34495e;
+            }
+        }
+        
+        function generateProblem() {
+            let num1, num2, operation, answer;
+            const difficultyLevel = Math.min(5, Math.floor(currentLevel / 2) + 1);
+            
+            const operations = ['+', '-', '*', '/'];
+            operation = operations[Math.floor(Math.random() * operations.length)];
+            
+            switch(operation) {
+                case '+':
+                    num1 = Math.floor(Math.random() * (5 * difficultyLevel)) + 1;
+                    num2 = Math.floor(Math.random() * (5 * difficultyLevel)) + 1;
+                    answer = num1 + num2;
+                    break;
+                case '-':
+                    num1 = Math.floor(Math.random() * (8 * difficultyLevel)) + 5;
+                    num2 = Math.floor(Math.random() * num1) + 1;
+                    answer = num1 - num2;
+                    break;
+                case '*':
+                    num1 = Math.floor(Math.random() * (3 * difficultyLevel)) + 2;
+                    num2 = Math.floor(Math.random() * (3 * difficultyLevel)) + 2;
+                    answer = num1 * num2;
+                    break;
+                case '/':
+                    num2 = Math.floor(Math.random() * (5 * difficultyLevel)) + 2;
+                    answer = Math.floor(Math.random() * (5 * difficultyLevel)) + 2;
+                    num1 = num2 * answer;
+                    break;
+            }
+            
+            return {
+                num1: num1,
+                num2: num2,
+                operation: operation,
+                answer: answer,
+                problem: `${num1} ${operation} ${num2}`
+            };
+        }
+        
+        function fireWeapon() {
+            if (Date.now() - lastFireTime < fireRate) return;
+            
+            let actualFireRate = fireRate * (1 - (upgrades.rapidFire * 0.25));
+            if (tempEffects.rapidFire > 0) {
+                actualFireRate *= 0.5; // Double fire rate when temp effect is active
+            }
+            
+            // Check for active weapon effect
+            if (weaponEffectTimer > 0) {
+                weaponEffectTimer -= 16;
+                if (weaponEffectTimer <= 0) {
+                    activeWeaponType = 'basic';
+                }
+            }
+            
+            if (Date.now() - lastFireTime < actualFireRate) return;
+            
+            // Use dynamic weapon type or fallback to upgrades
+            if (activeWeaponType !== 'basic') {
+                fireDynamicWeapon();
+            } else if (upgrades.laserCannon) {
+                createMissile(player.x, player.y - 25, 'laser');
+            } else if (upgrades.spreadShot || tempEffects.multiShot > 0) {
+                createMissile(player.x - 15, player.y - 25);
+                createMissile(player.x, player.y - 25);
+                createMissile(player.x + 15, player.y - 25);
+            } else if (upgrades.doubleShot) {
+                createMissile(player.x - 8, player.y - 25);
+                createMissile(player.x + 8, player.y - 25);
+            } else {
+                createMissile(player.x, player.y - 25);
+            }
+            
+            lastFireTime = Date.now();
+            if (sounds.shoot) sounds.shoot();
+        }
+        
+        function fireDynamicWeapon() {
+            const powerLevel = weaponPowerLevels[activeWeaponType];
+            
+            switch (activeWeaponType) {
+                case 'add': // Addition - Spread Shot (Green)
+                    fireSpreadWeapon(powerLevel);
+                    break;
+                case 'sub': // Subtraction - Rapid Fire (Red)
+                    fireRapidWeapon(powerLevel);
+                    break;
+                case 'mult': // Multiplication - Multi-Shot (Orange)
+                    fireMultiWeapon(powerLevel);
+                    break;
+                case 'div': // Division - Laser Beam (Purple)
+                    fireLaserWeapon(powerLevel);
+                    break;
+            }
+        }
+        
+        function fireSpreadWeapon(powerLevel) {
+            const spreadCount = Math.min(2 + powerLevel, 7); // 2 to 7 missiles
+            const angle = Math.PI / 6; // 30 degrees spread
+            const centerX = player.x;
+            const centerY = player.y - 25;
+            
+            for (let i = 0; i < spreadCount; i++) {
+                const offsetAngle = ((i - (spreadCount - 1) / 2) * angle) / (spreadCount - 1);
+                const xOffset = Math.sin(offsetAngle) * 30;
+                const yOffset = Math.cos(offsetAngle) * 10;
+                createMissile(centerX + xOffset, centerY - yOffset, 'spread');
+            }
+        }
+        
+        function fireRapidWeapon(powerLevel) {
+            const rapidCount = Math.min(1 + Math.floor(powerLevel / 2), 3); // 1 to 3 missiles
+            for (let i = 0; i < rapidCount; i++) {
+                const xOffset = (i - Math.floor(rapidCount / 2)) * 8;
+                createMissile(player.x + xOffset, player.y - 25 - (i * 10), 'rapid');
+            }
+        }
+        
+        function fireMultiWeapon(powerLevel) {
+            const burstCount = Math.min(3 + powerLevel, 8); // 3 to 8 missiles
+            const radius = 25 + (powerLevel * 5);
+            
+            for (let i = 0; i < burstCount; i++) {
+                const angle = (i / burstCount) * Math.PI * 2;
+                const xOffset = Math.cos(angle) * radius;
+                const yOffset = Math.sin(angle) * radius * 0.3;
+                createMissile(player.x + xOffset, player.y - 25 + yOffset, 'multi');
+            }
+        }
+        
+        function fireLaserWeapon(powerLevel) {
+            const beamCount = Math.min(1 + Math.floor(powerLevel / 3), 3); // 1 to 3 beams
+            for (let i = 0; i < beamCount; i++) {
+                const xOffset = (i - Math.floor(beamCount / 2)) * 20;
+                createMissile(player.x + xOffset, player.y - 25, 'beam');
+            }
+        }
+        
+        function clearFormationEnemies() {
+            // Remove all formation enemies (non-math enemies) when answering correctly
+            formationEnemies.forEach(enemy => {
+                gameObjectsContainer.removeChild(enemy);
+                createExplosion(enemy.x, enemy.y, 0xffd700); // Gold explosion
+                score += 10; // Bonus points for cleared enemies
+            });
+            formationEnemies.length = 0; // Clear the array
+        }
+        
+        function applyPowerUp(type) {
+            switch(type) {
+                case 'health':
+                    lives = Math.min(lives + 1, 5); // Max 5 lives
+                    updateUI();
+                    break;
+                case 'weaponAdd':
+                    if (activeWeaponType === 'add') {
+                        weaponPowerLevels.add++;
+                    } else {
+                        activeWeaponType = 'add';
+                        weaponEffectTimer = weaponEffectDuration;
+                        if (weaponPowerLevels.add === 0) weaponPowerLevels.add = 1;
+                    }
+                    break;
+                case 'weaponSub':
+                    if (activeWeaponType === 'sub') {
+                        weaponPowerLevels.sub++;
+                    } else {
+                        activeWeaponType = 'sub';
+                        weaponEffectTimer = weaponEffectDuration;
+                        if (weaponPowerLevels.sub === 0) weaponPowerLevels.sub = 1;
+                    }
+                    break;
+                case 'weaponMult':
+                    if (activeWeaponType === 'mult') {
+                        weaponPowerLevels.mult++;
+                    } else {
+                        activeWeaponType = 'mult';
+                        weaponEffectTimer = weaponEffectDuration;
+                        if (weaponPowerLevels.mult === 0) weaponPowerLevels.mult = 1;
+                    }
+                    break;
+                case 'weaponDiv':
+                    if (activeWeaponType === 'div') {
+                        weaponPowerLevels.div++;
+                    } else {
+                        activeWeaponType = 'div';
+                        weaponEffectTimer = weaponEffectDuration;
+                        if (weaponPowerLevels.div === 0) weaponPowerLevels.div = 1;
+                    }
+                    break;
+                case 'rapidFire':
+                    tempEffects.rapidFire = 600; // 10 seconds at 60fps
+                    break;
+                case 'multiShot':
+                    tempEffects.multiShot = 450; // 7.5 seconds at 60fps
+                    break;
+                case 'shield':
+                    tempEffects.shield = 300; // 5 seconds at 60fps
+                    if (player.children.length <= 5) { // Don't add multiple shields
+                        const shield = new PIXI.Graphics();
+                        shield.lineStyle(3, 0x00d4ff, 0.8);
+                        shield.drawCircle(0, 0, 35);
+                        shield.name = 'shield';
+                        player.addChild(shield);
+                    }
+                    break;
+            }
+        }
+        
+        function updateGame() {
+            if (!gameRunning) return;
+            
+            // Update player position
+            player.x += (mouseX - player.x) * 0.1;
+            player.y += (mouseY - player.y) * 0.1;
+            player.x = Math.max(40, Math.min(app.screen.width - 40, player.x));
+            player.y = Math.max(40, Math.min(app.screen.height - 40, player.y));
+            
+            // Animate engine flames
+            if (player) {
+                const leftFlame = player.getChildByName('leftFlame');
+                const rightFlame = player.getChildByName('rightFlame');
+                const centerFlame = player.getChildByName('centerFlame');
+                
+                if (leftFlame && rightFlame && centerFlame) {
+                    const flameIntensity = 0.8 + Math.sin(Date.now() * 0.01) * 0.2;
+                    leftFlame.alpha = flameIntensity;
+                    rightFlame.alpha = flameIntensity;
+                    centerFlame.alpha = flameIntensity;
+                    
+                    // Scale flames based on movement
+                    const movementSpeed = Math.abs(mouseX - player.x) + Math.abs(mouseY - player.y);
+                    const flameScale = 1 + (movementSpeed * 0.01);
+                    leftFlame.scale.y = flameScale;
+                    rightFlame.scale.y = flameScale;
+                    centerFlame.scale.y = flameScale;
+                }
+            }
+            
+            // Update temporary effects
+            for (let effect in tempEffects) {
+                if (tempEffects[effect] > 0) {
+                    tempEffects[effect]--;
+                    if (tempEffects[effect] === 0 && effect === 'shield') {
+                        // Remove shield when effect expires
+                        const shield = player.getChildByName('shield');
+                        if (shield) {
+                            player.removeChild(shield);
+                        }
+                    }
+                }
+            }
+            
+            // Continuous firing
+            if (mouseDown) {
+                fireWeapon();
+            }
+            
+            // Update star field
+            starField.children.forEach(star => {
+                star.y += star.speed;
+                if (star.y > app.screen.height) {
+                    star.y = 0;
+                    star.x = Math.random() * app.screen.width;
+                }
+            });
+            
+            // Spawn enemies
+            mathEnemySpawnTimer++;
+            if (mathEnemySpawnTimer >= mathEnemySpawnDelay) {
+                createMathEnemy(Math.random() * (app.screen.width - 200) + 100, -50);
+                mathEnemySpawnTimer = 0;
+            }
+            
+            formationSpawnTimer++;
+            if (formationSpawnTimer >= formationSpawnDelay) {
+                // Create formation of blue enemies
+                const formationSize = 4 + Math.floor(Math.random() * 3); // 4-6 enemies
+                for (let i = 0; i < formationSize; i++) {
+                    createFormationEnemy(
+                        Math.random() * (app.screen.width - 200) + 100, 
+                        -50 - i * 25
+                    );
+                }
+                formationSpawnTimer = 0;
+            }
+            
+            // Spawn coins
+            coinSpawnTimer++;
+            if (coinSpawnTimer >= coinSpawnDelay) {
+                createCoin(Math.random() * (app.screen.width - 100) + 50, -20);
+                coinSpawnTimer = 0;
+            }
+            
+            // Spawn power-ups occasionally
+            if (Math.random() < 0.004) { // 0.4% chance per frame
+                const powerUpTypes = ['health', 'rapidFire', 'multiShot', 'shield', 'weaponAdd', 'weaponSub', 'weaponMult', 'weaponDiv'];
+                const randomType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+                createPowerUp(Math.random() * (app.screen.width - 100) + 50, -20, randomType);
+            }
+            
+            
+            // Update missiles
+            missiles.forEach((missile, index) => {
+                missile.y -= missile.speed;
+                if (missile.y < -20) {
+                    gameObjectsContainer.removeChild(missile);
+                    missiles.splice(index, 1);
+                }
+            });
+            
+            // Update answer missiles
+            answerMissiles.forEach((missile, index) => {
+                missile.y -= missile.speed;
+                if (missile.y < -20) {
+                    gameObjectsContainer.removeChild(missile);
+                    answerMissiles.splice(index, 1);
+                }
+            });
+            
+            // Update enemies
+            mathEnemies.forEach((enemy, index) => {
+                enemy.y += enemy.speed;
+                if (enemy.y > app.screen.height + 50) {
+                    gameObjectsContainer.removeChild(enemy);
+                    mathEnemies.splice(index, 1);
+                    lives--;
+                    updateUI();
+                    if (lives <= 0) {
+                        endGame();
+                    }
+                }
+            });
+            
+            // Update formation enemies with looping patterns
+            formationEnemies.forEach((enemy, index) => {
+                enemy.angle += 0.03; // Animation speed
+                
+                switch(enemy.movementType) {
+                    case 'figure8':
+                        // Figure-8 pattern (Lissajous curve)
+                        enemy.x = enemy.centerX + Math.sin(enemy.angle + enemy.phase) * enemy.loopRadius;
+                        enemy.y = enemy.centerY + Math.sin(enemy.angle * 2 + enemy.phase) * (enemy.loopRadius * 0.5);
+                        break;
+                        
+                    case 'spiral':
+                        // Spiral pattern
+                        const spiralRadius = enemy.loopRadius * (1 - (enemy.angle * 0.1) % 1);
+                        enemy.x = enemy.centerX + Math.cos(enemy.angle * 3 + enemy.phase) * spiralRadius;
+                        enemy.y = enemy.centerY + Math.sin(enemy.angle * 3 + enemy.phase) * spiralRadius * 0.6;
+                        break;
+                }
+                
+                // Slowly drift downward
+                enemy.centerY += enemy.speed * 0.3;
+                
+                // Enemy shooting logic
+                enemy.shootTimer--;
+                if (enemy.shootTimer <= 0 && enemy.y > 0 && enemy.y < app.screen.height - 100) {
+                    createEnemyMissile(enemy.x, enemy.y);
+                    enemy.shootTimer = Math.random() * 400 + 200;
+                }
+                
+                // Remove if too far off screen
+                if (enemy.centerY > app.screen.height + 100 || 
+                    enemy.x < -100 || enemy.x > app.screen.width + 100) {
+                    gameObjectsContainer.removeChild(enemy);
+                    formationEnemies.splice(index, 1);
+                    lives--;
+                    updateUI();
+                    if (lives <= 0) {
+                        endGame();
+                    }
+                }
+            });
+            
+            // Update coins
+            coins_sprites.forEach((coin, index) => {
+                coin.y += coin.speed;
+                
+                // Magnet effect
+                const distance = Math.sqrt(Math.pow(coin.x - player.x, 2) + Math.pow(coin.y - player.y, 2));
+                if (distance < coin.collectRadius) {
+                    const dx = player.x - coin.x;
+                    const dy = player.y - coin.y;
+                    coin.x += dx * 0.1;
+                    coin.y += dy * 0.1;
+                }
+                
+                // Collect coin
+                if (distance < 20) {
+                    gameObjectsContainer.removeChild(coin);
+                    coins_sprites.splice(index, 1);
+                    coins += 1;
+                    levelStats.coinsCollected++;
+                    updateUI();
+                    if (sounds.correctAnswer) sounds.correctAnswer();
+                }
+                
+                // Remove coins that fall off screen
+                if (coin.y > app.screen.height + 50) {
+                    gameObjectsContainer.removeChild(coin);
+                    coins_sprites.splice(index, 1);
+                }
+            });
+            
+            // Update bosses
+            bosses.forEach((boss, index) => {
+                boss.moveTimer++;
+                boss.shootTimer++;
+                
+                // Boss movement pattern
+                if (boss.y < 100) {
+                    boss.y += boss.speed;
+                } else {
+                    // Side to side movement
+                    boss.x += boss.direction * 2;
+                    if (boss.x <= 80 || boss.x >= app.screen.width - 80) {
+                        boss.direction *= -1;
+                    }
+                }
+                
+                // Boss shooting pattern
+                if (boss.shootTimer > 60) { // Shoot every second
+                    // Create multiple enemy missiles in a pattern
+                    for (let i = -2; i <= 2; i++) {
+                        createEnemyMissile(boss.x + i * 20, boss.y + 30);
+                    }
+                    boss.shootTimer = 0;
+                }
+                
+                // Update health bar
+                const healthBar = boss.getChildByName('healthBar');
+                if (healthBar) {
+                    healthBar.clear();
+                    const healthPercentage = boss.health / boss.maxHealth;
+                    const barColor = healthPercentage > 0.5 ? 0xff0000 : healthPercentage > 0.25 ? 0xff8800 : 0xffff00;
+                    healthBar.beginFill(barColor);
+                    healthBar.drawRect(-40, -50, 80 * healthPercentage, 8);
+                    healthBar.endFill();
+                }
+                
+                // Remove boss if health reaches 0
+                if (boss.health <= 0) {
+                    gameObjectsContainer.removeChild(boss);
+                    bosses.splice(index, 1);
+                    score += 500;
+                    createExplosion(boss.x, boss.y, 0xff8800);
+                    
+                    // Drop multiple coins and power-ups
+                    for (let i = 0; i < 5; i++) {
+                        createCoin(boss.x + (Math.random() - 0.5) * 60, boss.y + (Math.random() - 0.5) * 60);
+                    }
+                    createPowerUp(boss.x, boss.y, 'health');
+                    
+                    // Advance to next level
+                    currentLevel++;
+                    updateUI();
+                    
+                    if (sounds.correctAnswer) sounds.correctAnswer();
+                }
+            });
+            
+            // Update particles
+            particles.forEach((particle, index) => {
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.vy += particle.gravity || 0;
+                particle.vx *= 0.99;
+                particle.vy *= 0.99;
+                particle.rotation += particle.rotationSpeed || 0;
+                particle.life -= particle.decay;
+                particle.alpha = particle.life;
+                
+                if (particle.life <= 0) {
+                    particleContainer.removeChild(particle);
+                    particles.splice(index, 1);
+                }
+            });
+            
+            // Update power-ups
+            powerUps.forEach((powerUp, index) => {
+                powerUp.y += powerUp.speed;
+                powerUp.bobOffset += powerUp.bobSpeed;
+                powerUp.children[1].y = Math.sin(powerUp.bobOffset) * 3; // Bob animation
+                powerUp.children[1].rotation += 0.02; // Slow rotation
+                
+                // Collect power-up
+                const distance = Math.sqrt(Math.pow(powerUp.x - player.x, 2) + Math.pow(powerUp.y - player.y, 2));
+                if (distance < 25) {
+                    gameObjectsContainer.removeChild(powerUp);
+                    powerUps.splice(index, 1);
+                    applyPowerUp(powerUp.type);
+                    createExplosion(powerUp.x, powerUp.y, 0xffd700);
+                    if (sounds.correctAnswer) sounds.correctAnswer();
+                }
+                
+                // Remove power-ups that fall off screen
+                if (powerUp.y > app.screen.height + 50) {
+                    gameObjectsContainer.removeChild(powerUp);
+                    powerUps.splice(index, 1);
+                }
+            });
+            
+            // Collision detection
+            checkCollisions();
+        }
+        
+        function checkCollisions() {
+            // Missile vs math enemies
+            missiles.forEach((missile, mIndex) => {
+                mathEnemies.forEach((enemy, eIndex) => {
+                    const distance = Math.sqrt(Math.pow(missile.x - enemy.x, 2) + Math.pow(missile.y - enemy.y, 2));
+                    if (distance < 25) {
+                        gameObjectsContainer.removeChild(missile);
+                        missiles.splice(mIndex, 1);
+                        createExplosion(missile.x, missile.y, 0x00d4ff);
+                        // Math enemies are damaged but not destroyed by regular missiles
+                    }
+                });
+            });
+            
+            // Missile vs formation enemies
+            missiles.forEach((missile, mIndex) => {
+                formationEnemies.forEach((enemy, eIndex) => {
+                    const distance = Math.sqrt(Math.pow(missile.x - enemy.x, 2) + Math.pow(missile.y - enemy.y, 2));
+                    if (distance < 20) {
+                        gameObjectsContainer.removeChild(missile);
+                        gameObjectsContainer.removeChild(enemy);
+                        missiles.splice(mIndex, 1);
+                        formationEnemies.splice(eIndex, 1);
+                        score += 10;
+                        updateUI();
+                        createExplosion(enemy.x, enemy.y, 0x64c8ff);
+                        if (sounds.enemyHit) sounds.enemyHit();
+                        
+                        // Drop coin chance - higher in early levels
+                        const coinChance = currentLevel <= 3 ? 0.6 : 0.3;
+                        if (Math.random() < coinChance) {
+                            createCoin(enemy.x, enemy.y);
+                        }
+                        
+                        // Track level stats
+                        levelStats.enemiesKilled++;
+                        enemiesKilledThisLevel++;
+                        checkLevelComplete();
+                    }
+                });
+            });
+            
+            // Missile vs bosses
+            missiles.forEach((missile, mIndex) => {
+                bosses.forEach((boss, bIndex) => {
+                    const distance = Math.sqrt(Math.pow(missile.x - boss.x, 2) + Math.pow(missile.y - boss.y, 2));
+                    if (distance < 45) {
+                        gameObjectsContainer.removeChild(missile);
+                        missiles.splice(mIndex, 1);
+                        boss.health -= 1;
+                        createExplosion(missile.x, missile.y, 0xff8800);
+                        if (sounds.enemyHit) sounds.enemyHit();
+                    }
+                });
+            });
+            
+            // Answer missile vs math enemies
+            answerMissiles.forEach((missile, mIndex) => {
+                mathEnemies.forEach((enemy, eIndex) => {
+                    const distance = Math.sqrt(Math.pow(missile.x - enemy.x, 2) + Math.pow(missile.y - enemy.y, 2));
+                    if (distance < 30) {
+                        gameObjectsContainer.removeChild(missile);
+                        answerMissiles.splice(mIndex, 1);
+                        
+                        if (missile.answer === enemy.answer) {
+                            gameObjectsContainer.removeChild(enemy);
+                            mathEnemies.splice(eIndex, 1);
+                            score += 25;
+                            updateUI();
+                            createExplosion(enemy.x, enemy.y, 0x64ff64);
+                            if (sounds.correctAnswer) sounds.correctAnswer();
+                            
+                            // Drop coin chance - higher in early levels
+                            const coinChance = currentLevel <= 3 ? 0.8 : 0.5;
+                            if (Math.random() < coinChance) {
+                                createCoin(enemy.x, enemy.y);
+                            }
+                            
+                            // Update global stats tracking
+                            globalStats.totalAnswers++;
+                            globalStats.correctAnswers++;
+                            globalStats.currentStreak++;
+                            if (globalStats.currentStreak > globalStats.bestStreak) {
+                                globalStats.bestStreak = globalStats.currentStreak;
+                            }
+                            
+                            // Track enemy type kills
+                            if (enemy.problemData && enemy.problemData.operation) {
+                                switch (enemy.problemData.operation) {
+                                    case '+': globalStats.enemyKills.add++; break;
+                                    case '-': globalStats.enemyKills.sub++; break;
+                                    case '*': globalStats.enemyKills.mult++; break;
+                                    case '/': globalStats.enemyKills.div++; break;
+                                }
+                            }
+                            
+                            // Clear all non-math enemies when answering correctly
+                            clearFormationEnemies();
+                            
+                            // Track level stats
+                            levelStats.enemiesKilled++;
+                            levelStats.correctAnswers++;
+                            levelStats.totalAnswers++;
+                            enemiesKilledThisLevel++;
+                            checkLevelComplete();
+                        } else {
+                            createExplosion(missile.x, missile.y, 0xffff64);
+                            if (sounds.wrongAnswer) sounds.wrongAnswer();
+                            
+                            // Update global stats tracking
+                            globalStats.totalAnswers++;
+                            globalStats.currentStreak = 0; // Reset streak on wrong answer
+                            
+                            levelStats.totalAnswers++;
+                        }
+                    }
+                });
+            });
+            
+            // Enemy missiles vs player
+            enemyMissiles.forEach((missile, mIndex) => {
+                const distance = Math.sqrt(Math.pow(missile.x - player.x, 2) + Math.pow(missile.y - player.y, 2));
+                if (distance < 25) {
+                    gameObjectsContainer.removeChild(missile);
+                    enemyMissiles.splice(mIndex, 1);
+                    
+                    // Check if player has shield
+                    if (tempEffects.shield > 0) {
+                        createExplosion(missile.x, missile.y, 0x00d4ff);
+                        if (sounds.enemyHit) sounds.enemyHit();
+                    } else {
+                        lives--;
+                        updateUI();
+                        createExplosion(missile.x, missile.y, 0xff6464);
+                        if (sounds.wrongAnswer) sounds.wrongAnswer();
+                        
+                        if (lives <= 0) {
+                            endGame();
+                        }
+                    }
+                }
+            });
+            
+            // Update enemy missiles
+            enemyMissiles.forEach((missile, index) => {
+                missile.y += missile.speed;
+                if (missile.y > app.screen.height + 20) {
+                    gameObjectsContainer.removeChild(missile);
+                    enemyMissiles.splice(index, 1);
+                }
+            });
+        }
+        
+        function updateUI() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('lives').textContent = lives;
+            document.getElementById('level').textContent = currentLevel;
+            document.getElementById('uiCoins').textContent = coins;
+            document.getElementById('coinDisplay').textContent = coins;
+            document.getElementById('levelProgress').textContent = enemiesKilledThisLevel;
+            document.getElementById('levelTarget').textContent = enemiesNeededForLevel;
+            
+            // Update weapon display
+            let weaponName = 'Basic';
+            if (upgrades.laserCannon) weaponName = 'Laser Cannon';
+            else if (upgrades.spreadShot) weaponName = 'Spread Shot';
+            else if (upgrades.doubleShot) weaponName = 'Double Shot';
+            
+            document.getElementById('currentWeapon').textContent = weaponName;
+            document.getElementById('fireRateDisplay').textContent = Math.round(100 * (1 + upgrades.rapidFire * 0.25)) + '%';
+            
+            // Update stats panel
+            updateStatsPanel();
+        }
+        
+        function updateStatsPanel() {
+            // Current session stats
+            document.getElementById('totalScore').textContent = score;
+            document.getElementById('currentLevelStat').textContent = currentLevel;
+            document.getElementById('livesRemaining').textContent = lives;
+            document.getElementById('totalCoins').textContent = coins;
+            
+            // Enemy kill counts
+            document.getElementById('addKills').textContent = globalStats.enemyKills.add;
+            document.getElementById('subKills').textContent = globalStats.enemyKills.sub;
+            document.getElementById('multKills').textContent = globalStats.enemyKills.mult;
+            document.getElementById('divKills').textContent = globalStats.enemyKills.div;
+            
+            // Math accuracy stats
+            document.getElementById('totalAnswers').textContent = globalStats.totalAnswers;
+            document.getElementById('correctAnswers').textContent = globalStats.correctAnswers;
+            
+            const accuracy = globalStats.totalAnswers > 0 ? 
+                Math.round((globalStats.correctAnswers / globalStats.totalAnswers) * 100) : 0;
+            document.getElementById('accuracyRate').textContent = accuracy + '%';
+            
+            document.getElementById('currentStreak').textContent = globalStats.currentStreak;
+            document.getElementById('bestStreak').textContent = globalStats.bestStreak;
+            
+            // Dynamic weapon system
+            let activeWeaponName = 'Basic';
+            switch (activeWeaponType) {
+                case 'add': activeWeaponName = 'Spread Shot'; break;
+                case 'sub': activeWeaponName = 'Rapid Fire'; break;
+                case 'mult': activeWeaponName = 'Multi-Shot'; break;
+                case 'div': activeWeaponName = 'Laser Beam'; break;
+            }
+            
+            document.getElementById('activeWeaponType').textContent = activeWeaponName;
+            document.getElementById('addWeaponLevel').textContent = weaponPowerLevels.add;
+            document.getElementById('subWeaponLevel').textContent = weaponPowerLevels.sub;
+            document.getElementById('multWeaponLevel').textContent = weaponPowerLevels.mult;
+            document.getElementById('divWeaponLevel').textContent = weaponPowerLevels.div;
+        }
+        
+        function startGame() {
+            if (!audioInitialized) {
+                initAudio();
+            }
+            
+            gameState = 'playing';
+            gameRunning = true;
+            resetGame();
+            levelStartTime = Date.now();
+            
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('pauseScreen').classList.add('hidden');
+            document.getElementById('levelCompleteScreen').classList.add('hidden');
+            document.getElementById('ui').classList.remove('hidden');
+            document.getElementById('weaponDisplay').classList.remove('hidden');
+            document.getElementById('answerInput').classList.remove('hidden');
+            
+            updateUI();
+            
+            if (backgroundMusic) {
+                backgroundMusic.start();
+            }
+            
+            app.ticker.add(updateGame);
+        }
+        
+        function resetGame() {
+            score = 0;
+            lives = 3;
+            currentLevel = 1;
+            enemiesKilledThisLevel = 0;
+            
+            // Give starting coins to help get first upgrade
+            if (coins === 0) {
+                coins = 25;
+            }
+            
+            // Reset level stats
+            levelStats = {
+                enemiesKilled: 0,
+                coinsCollected: 0,
+                accuracy: 0,
+                correctAnswers: 0,
+                totalAnswers: 0,
+                timeBonus: 0
+            };
+            
+            // Clear all game objects
+            missiles.forEach(missile => gameObjectsContainer.removeChild(missile));
+            answerMissiles.forEach(missile => gameObjectsContainer.removeChild(missile));
+            enemyMissiles.forEach(missile => gameObjectsContainer.removeChild(missile));
+            mathEnemies.forEach(enemy => gameObjectsContainer.removeChild(enemy));
+            formationEnemies.forEach(enemy => gameObjectsContainer.removeChild(enemy));
+            bosses.forEach(boss => gameObjectsContainer.removeChild(boss));
+            coins_sprites.forEach(coin => gameObjectsContainer.removeChild(coin));
+            powerUps.forEach(powerUp => gameObjectsContainer.removeChild(powerUp));
+            particles.forEach(particle => particleContainer.removeChild(particle));
+            
+            missiles = [];
+            answerMissiles = [];
+            enemyMissiles = [];
+            mathEnemies = [];
+            formationEnemies = [];
+            bosses = [];
+            coins_sprites = [];
+            powerUps = [];
+            particles = [];
+            
+            // Reset temporary effects
+            tempEffects = {
+                rapidFire: 0,
+                multiShot: 0,
+                shield: 0
+            };
+            
+            // Remove shield if present
+            if (player) {
+                const shield = player.getChildByName('shield');
+                if (shield) {
+                    player.removeChild(shield);
+                }
+            }
+            
+            // Reset spawn timers
+            mathEnemySpawnTimer = 0;
+            formationSpawnTimer = 0;
+            coinSpawnTimer = 0;
+            
+            // Reset player position
+            if (player) {
+                player.x = 400;
+                player.y = 650; // Adjusted for taller screen
+            }
+            
+            mouseDown = false;
+            lastFireTime = 0;
+        }
+        
+        function endGame() {
+            gameState = 'gameOver';
+            gameRunning = false;
+            
+            document.getElementById('ui').classList.add('hidden');
+            document.getElementById('shopButton').classList.add('hidden');
+            document.getElementById('weaponDisplay').classList.add('hidden');
+            document.getElementById('answerInput').classList.add('hidden');
+            document.getElementById('finalScore').textContent = `Final Score: ${score}`;
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+            
+            if (backgroundMusic) {
+                backgroundMusic.stop();
+            }
+            
+            app.ticker.remove(updateGame);
+        }
+        
+        function checkLevelComplete() {
+            if (enemiesKilledThisLevel >= enemiesNeededForLevel) {
+                completeLevel();
+            }
+        }
+        
+        function completeLevel() {
+            gameState = 'levelComplete';
+            gameRunning = false;
+            
+            // Calculate time bonus
+            const levelTime = Date.now() - levelStartTime;
+            const timeInSeconds = Math.floor(levelTime / 1000);
+            const maxTime = 60; // 1 minute max for full bonus
+            const timeBonus = Math.max(0, Math.floor((maxTime - timeInSeconds) * 2));
+            levelStats.timeBonus = timeBonus;
+            
+            // Calculate accuracy
+            levelStats.accuracy = levelStats.totalAnswers > 0 ? 
+                Math.round((levelStats.correctAnswers / levelStats.totalAnswers) * 100) : 100;
+            
+            // Add time bonus to score and coins
+            score += timeBonus;
+            coins += Math.floor(timeBonus / 10);
+            
+            // Update UI elements
+            document.getElementById('completedLevel').textContent = currentLevel;
+            document.getElementById('levelEnemiesKilled').textContent = levelStats.enemiesKilled;
+            document.getElementById('levelCoinsCollected').textContent = levelStats.coinsCollected;
+            document.getElementById('levelAccuracy').textContent = levelStats.accuracy + '%';
+            document.getElementById('levelTimeBonus').textContent = '+' + timeBonus;
+            document.getElementById('levelTotalScore').textContent = score;
+            document.getElementById('levelTotalCoins').textContent = coins;
+            
+            // Hide game UI and show level complete screen
+            document.getElementById('ui').classList.add('hidden');
+            document.getElementById('weaponDisplay').classList.add('hidden');
+            document.getElementById('answerInput').classList.add('hidden');
+            document.getElementById('levelCompleteScreen').classList.remove('hidden');
+            
+            updateUI();
+            
+            if (sounds.correctAnswer) sounds.correctAnswer();
+        }
+        
+        function openShopFromLevel() {
+            document.getElementById('levelCompleteScreen').classList.add('hidden');
+            document.getElementById('shopScreen').classList.remove('hidden');
+            updateShopButtons();
+        }
+        
+        function continueToNextLevel() {
+            // Reset level stats
+            enemiesKilledThisLevel = 0;
+            levelStats = {
+                enemiesKilled: 0,
+                coinsCollected: 0,
+                accuracy: 0,
+                correctAnswers: 0,
+                totalAnswers: 0,
+                timeBonus: 0
+            };
+            
+            // Increase difficulty
+            currentLevel++;
+            enemiesNeededForLevel = Math.min(12, 5 + Math.floor(currentLevel / 2)); // Gradually increase enemies needed
+            
+            // Clear remaining enemies and objects
+            mathEnemies.forEach(enemy => gameObjectsContainer.removeChild(enemy));
+            formationEnemies.forEach(enemy => gameObjectsContainer.removeChild(enemy));
+            bosses.forEach(boss => gameObjectsContainer.removeChild(boss));
+            coins_sprites.forEach(coin => gameObjectsContainer.removeChild(coin));
+            powerUps.forEach(powerUp => gameObjectsContainer.removeChild(powerUp));
+            enemyMissiles.forEach(missile => gameObjectsContainer.removeChild(missile));
+            
+            mathEnemies = [];
+            formationEnemies = [];
+            bosses = [];
+            coins_sprites = [];
+            powerUps = [];
+            enemyMissiles = [];
+            
+            // Resume game
+            gameState = 'playing';
+            gameRunning = true;
+            levelStartTime = Date.now();
+            
+            document.getElementById('levelCompleteScreen').classList.add('hidden');
+            document.getElementById('ui').classList.remove('hidden');
+            document.getElementById('weaponDisplay').classList.remove('hidden');
+            document.getElementById('answerInput').classList.remove('hidden');
+            
+            updateUI();
+        }
+        
+        function restartGame() {
+            startGame();
+        }
+        
+        function closeShop() {
+            document.getElementById('shopScreen').classList.add('hidden');
+            document.getElementById('levelCompleteScreen').classList.remove('hidden');
+        }
+        
+        function buyUpgrade(upgrade, cost) {
+            if (coins >= cost) {
+                coins -= cost;
+                
+                switch(upgrade) {
+                    case 'rapidFire':
+                        upgrades.rapidFire = Math.min(upgrades.rapidFire + 1, 5);
+                        break;
+                    case 'doubleShot':
+                        upgrades.doubleShot = true;
+                        break;
+                    case 'spreadShot':
+                        upgrades.spreadShot = true;
+                        break;
+                    case 'laserCannon':
+                        upgrades.laserCannon = true;
+                        break;
+                    case 'shield':
+                        upgrades.shield = true;
+                        break;
+                    case 'magnet':
+                        upgrades.magnet = true;
+                        break;
+                }
+                
+                updateUI();
+                updateShopButtons();
+                if (sounds.correctAnswer) sounds.correctAnswer();
+            } else {
+                if (sounds.wrongAnswer) sounds.wrongAnswer();
+            }
+        }
+        
+        function updateShopButtons() {
+            const shopItems = document.querySelectorAll('.shop-item button');
+            shopItems.forEach((button, index) => {
+                const costs = [50, 100, 150, 200];
+                const upgrades_list = ['rapidFire', 'doubleShot', 'spreadShot', 'laserCannon'];
+                
+                if (index < costs.length) {
+                    const cost = costs[index];
+                    const upgrade = upgrades_list[index];
+                    
+                    if (coins < cost) {
+                        button.disabled = true;
+                        button.textContent = 'Not enough coins';
+                    } else if (upgrade === 'rapidFire' && upgrades.rapidFire >= 5) {
+                        button.disabled = true;
+                        button.textContent = 'Max level';
+                    } else if (upgrade !== 'rapidFire' && upgrades[upgrade]) {
+                        button.disabled = true;
+                        button.textContent = 'Owned';
+                    } else {
+                        button.disabled = false;
+                        button.textContent = 'Buy';
+                    }
+                }
+            });
+        }
+        
+        // Audio initialization with background music
+        function initAudio() {
+            if (audioInitialized) return;
+            
+            const masterVolume = new Tone.Volume(-12).toDestination();
+            
+            // Create arcade-style background music
+            const lead = new Tone.Synth({
+                oscillator: { type: "square" },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 0.2 }
+            }).connect(masterVolume);
+            
+            const bass = new Tone.Synth({
+                oscillator: { type: "sawtooth" },
+                envelope: { attack: 0.01, decay: 0.2, sustain: 0.6, release: 0.3 }
+            }).connect(masterVolume);
+            
+            const harmony = new Tone.Synth({
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.02, decay: 0.15, sustain: 0.4, release: 0.4 }
+            }).connect(masterVolume);
+            
+            // Fast-paced arcade melody (inspired by classic space shooters)
+            const leadPattern = [
+                "G4", "G4", "D5", "D5", "G4", "G4", "D5", "D5",
+                "F4", "F4", "C5", "C5", "F4", "F4", "C5", "C5",
+                "E4", "E4", "B4", "B4", "E4", "E4", "B4", "B4",
+                "F4", "F4", "C5", "C5", "G4", "G4", "D5", "D5"
+            ];
+            
+            const bassPattern = [
+                "G2", null, "G2", null, "G2", null, "G2", null,
+                "F2", null, "F2", null, "F2", null, "F2", null,
+                "E2", null, "E2", null, "E2", null, "E2", null,
+                "F2", null, "F2", null, "G2", null, "G2", null
+            ];
+            
+            const harmonyPattern = [
+                "B3", "D4", "B3", "D4", "B3", "D4", "B3", "D4",
+                "A3", "C4", "A3", "C4", "A3", "C4", "A3", "C4",
+                "G3", "B3", "G3", "B3", "G3", "B3", "G3", "B3",
+                "A3", "C4", "A3", "C4", "B3", "D4", "B3", "D4"
+            ];
+            
+            const leadSeq = new Tone.Sequence((time, note) => {
+                if (note) lead.triggerAttackRelease(note, "16n", time);
+            }, leadPattern, "8n");
+            
+            const bassSeq = new Tone.Sequence((time, note) => {
+                if (note) bass.triggerAttackRelease(note, "8n", time);
+            }, bassPattern, "8n");
+            
+            const harmonySeq = new Tone.Sequence((time, note) => {
+                if (note) harmony.triggerAttackRelease(note, "16n", time);
+            }, harmonyPattern, "8n");
+            
+            backgroundMusic = {
+                start: () => {
+                    Tone.Transport.bpm.value = 140; // Faster tempo for arcade feel
+                    leadSeq.start(0);
+                    bassSeq.start(0);
+                    harmonySeq.start(0);
+                    Tone.Transport.start();
+                },
+                stop: () => {
+                    leadSeq.stop();
+                    bassSeq.stop();
+                    harmonySeq.stop();
+                    Tone.Transport.stop();
+                    Tone.Transport.cancel();
+                }
+            };
+            
+            sounds = {
+                shoot: () => {
+                    const synth = new Tone.Synth({
+                        oscillator: { type: "square" },
+                        envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
+                    }).connect(masterVolume);
+                    synth.triggerAttackRelease("C5", "32n");
+                    setTimeout(() => synth.dispose(), 200);
+                },
+                answerShoot: () => {
+                    const synth = new Tone.Synth({
+                        oscillator: { type: "triangle" },
+                        envelope: { attack: 0.01, decay: 0.15, sustain: 0, release: 0.15 }
+                    }).connect(masterVolume);
+                    synth.triggerAttackRelease("G5", "16n");
+                    setTimeout(() => synth.dispose(), 300);
+                },
+                correctAnswer: () => {
+                    const synth = new Tone.Synth({
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.01, decay: 0.15, sustain: 0, release: 0.15 }
+                    }).connect(masterVolume);
+                    synth.triggerAttackRelease("C5", "16n");
+                    setTimeout(() => synth.triggerAttackRelease("E5", "16n"), 60);
+                    setTimeout(() => synth.triggerAttackRelease("G5", "8n"), 120);
+                    setTimeout(() => synth.dispose(), 300);
+                },
+                wrongAnswer: () => {
+                    const synth = new Tone.Synth({
+                        oscillator: { type: "square" },
+                        envelope: { attack: 0.01, decay: 0.15, sustain: 0, release: 0.15 }
+                    }).connect(masterVolume);
+                    synth.triggerAttackRelease("F3", "8n");
+                    setTimeout(() => synth.triggerAttackRelease("C3", "8n"), 80);
+                    setTimeout(() => synth.dispose(), 250);
+                },
+                enemyHit: () => {
+                    const noise = new Tone.Noise("white").connect(masterVolume);
+                    const env = new Tone.AmplitudeEnvelope({
+                        attack: 0.01, decay: 0.1, sustain: 0, release: 0.1
+                    }).connect(masterVolume);
+                    noise.connect(env);
+                    env.triggerAttackRelease("8n");
+                    noise.start();
+                    setTimeout(() => {
+                        noise.stop();
+                        noise.dispose();
+                        env.dispose();
+                    }, 150);
+                }
+            };
+            
+            audioInitialized = true;
+        }
+        
+        // Event listeners
+        document.addEventListener('mousemove', (e) => {
+            if (app && app.view) {
+                const rect = app.view.getBoundingClientRect();
+                mouseX = e.clientX - rect.left;
+                mouseY = e.clientY - rect.top;
+            }
+        });
+        
+        document.addEventListener('mouseup', (e) => {
+            if (e.button === 0) {
+                mouseDown = false;
+            }
+        });
+        
+        // Handle right-click for answer missiles
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
+        
+        document.addEventListener('mousedown', (e) => {
+            if (e.button === 0) { // Left click
+                if (gameRunning) {
+                    mouseDown = true;
+                    fireWeapon();
+                }
+            } else if (e.button === 2) { // Right click
+                e.preventDefault();
+                if (gameRunning) {
+                    const answerInput = document.getElementById('answerInput');
+                    const answer = parseInt(answerInput.value);
+                    if (!isNaN(answer) && answer !== '') {
+                        createAnswerMissile(player.x, player.y - 25, answer);
+                        answerInput.value = '';
+                        if (sounds.answerShoot) sounds.answerShoot();
+                    }
+                }
+                return false;
+            }
+        });
+        
+        // Add Enter key support for answer missiles
+        document.getElementById('answerInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && gameRunning) {
+                const answer = parseInt(e.target.value);
+                if (!isNaN(answer)) {
+                    createAnswerMissile(player.x, player.y - 25, answer);
+                    e.target.value = '';
+                    if (sounds.answerShoot) sounds.answerShoot();
+                }
+            }
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (gameState === 'playing') {
+                    // Pause game
+                    gameRunning = false;
+                    document.getElementById('pauseScreen').classList.remove('hidden');
+                } else if (gameState === 'paused') {
+                    // Resume game
+                    gameRunning = true;
+                    document.getElementById('pauseScreen').classList.add('hidden');
+                }
+            } else if (gameRunning && /^[0-9]$/.test(e.key)) {
+                // Auto-focus answer input when typing numbers
+                const answerInput = document.getElementById('answerInput');
+                answerInput.focus();
+            }
+        });
+        
+        // Initialize the game
+        window.addEventListener('load', () => {
+            initPixi();
+        });
+    </script>
+</body>
+</html>
