@@ -308,20 +308,20 @@
             // Create a volume control to prevent audio glitches
             const masterVolume = new Tone.Volume(-8).toDestination();
             
-            // Enhanced Game of Thrones intro style orchestral arrangement
+            // Authentic Golden Axe Wilderness - YM2151 FM synthesis style
             const strings = new Tone.Synth({
-                oscillator: { type: "sawtooth" },
-                envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 1.2 }
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.01, decay: 0.2, sustain: 0.6, release: 0.8 }
             }).connect(masterVolume);
             
             const brass = new Tone.Synth({
-                oscillator: { type: "square" },
-                envelope: { attack: 0.1, decay: 0.1, sustain: 0.9, release: 0.8 }
+                oscillator: { type: "sine" },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0.8, release: 1.0 }
             }).connect(masterVolume);
             
             const cellos = new Tone.Synth({
-                oscillator: { type: "triangle" },
-                envelope: { attack: 0.2, decay: 0.3, sustain: 0.6, release: 1.0 }
+                oscillator: { type: "sawtooth" },
+                envelope: { attack: 0.05, decay: 0.3, sustain: 0.4, release: 0.6 }
             }).connect(masterVolume);
             
             const drums = new Tone.NoiseSynth({
@@ -329,39 +329,39 @@
                 envelope: { attack: 0.005, decay: 0.1, sustain: 0.0, release: 0.1 }
             }).connect(masterVolume);
             
-            // Authentic Game of Thrones main theme (simplified for web audio)
+            // Authentic Golden Axe Wilderness melody (C major/A minor key)
             const gotMainTheme = [
-                "G3", "C4", "Eb4", "F4", "G4", "C4", "Eb4", "F4",
-                "G3", "C4", "Eb4", "F4", "G4", "G4", "F4", "Eb4",
-                "C4", "G3", "C4", "Eb4", "F4", "G4", "C4", "G3",
-                "G4", "C5", "Eb5", "F5", "G5", "C5", "Eb5", "F5" // Higher register
+                "C4", "D4", "E4", "F4", "G4", "A4", "G4", "F4",
+                "E4", "F4", "G4", "A4", "B4", "C5", "B4", "A4",
+                "G4", "F4", "E4", "D4", "C4", "D4", "E4", "F4",
+                "G4", "A4", "G4", "F4", "E4", "D4", "C4", null
             ];
             
-            // String harmony with ascending motifs
+            // Authentic harmony patterns from Golden Axe Wilderness
             const stringHarmony = [
-                "C3", "G3", "G3", "Ab3", "Bb3", "G3", "G3", "Ab3",
-                "C3", "G3", "G3", "Ab3", "Bb3", "Bb3", "Ab3", "G3",
-                "G3", "C3", "G3", "G3", "Ab3", "Bb3", "G3", "C3",
-                "C4", "G4", "G4", "Ab4", "Bb4", "G4", "G4", "Ab4" // Building intensity
+                "E3", "G3", "C4", "E4", "B3", "D4", "G3", "B3",
+                "C4", "E4", "A3", "C4", "F3", "A3", "D4", "F4",
+                "E3", "G3", "C4", "E4", "B3", "D4", "G3", "B3",
+                "C4", "A3", "F3", "D4", "C4", "G3", "E3", null
             ];
             
-            // Deep cello bass line with dramatic timing
+            // Bass line matching Golden Axe wilderness progression
             const celloBass = [
-                "C2", "C2", "G2", "F2", "G2", "C2", "C2", "F2",
-                "C2", "C2", "G2", "F2", "G2", "G2", "F2", "C2",
-                "C2", "G2", "C2", "C2", "F2", "G2", "C2", "C2",
-                "C1", "C2", "G2", "F2", "G2", "C2", "C2", "F2" // Adding low C1 for power
+                "C2", null, "C2", null, "G2", null, "G2", null,
+                "A2", null, "A2", null, "F2", null, "F2", null,
+                "C2", null, "C2", null, "G2", null, "G2", null,
+                "A2", null, "F2", null, "C2", null, "C2", null
             ];
             
-            // Drum pattern for epicness
+            // Drum pattern matching Golden Axe wilderness rhythm
             const drumPattern = [
-                1, 0, 0, 1, 0, 0, 1, 0, // Strong-weak pattern
-                1, 0, 0, 1, 0, 1, 0, 1,
-                1, 0, 1, 0, 1, 0, 1, 0,
-                1, 1, 0, 1, 1, 0, 1, 1  // Building intensity
+                1, 0, 0, 1, 0, 0, 1, 0, // Authentic wilderness beat
+                1, 0, 0, 1, 0, 1, 0, 0,
+                1, 0, 0, 1, 0, 0, 1, 0,
+                1, 0, 1, 0, 1, 0, 0, 0
             ];
             
-            let currentTempo = 72; // Authentic GoT tempo
+            let currentTempo = 100; // Authentic Golden Axe wilderness tempo
             
             const mainThemePattern = new Tone.Sequence((time, note) => {
                 strings.triggerAttackRelease(note, "4n", time);

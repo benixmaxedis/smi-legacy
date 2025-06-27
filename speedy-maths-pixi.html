@@ -2437,59 +2437,59 @@
             
             const masterVolume = new Tone.Volume(-12).toDestination();
             
-            // Create arcade-style background music
+            // 80's Arcade Style - Classic 8-bit sound chip synthesis
             const lead = new Tone.Synth({
                 oscillator: { type: "square" },
-                envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 0.2 }
+                envelope: { attack: 0.001, decay: 0.05, sustain: 0.9, release: 0.1 }
             }).connect(masterVolume);
             
             const bass = new Tone.Synth({
-                oscillator: { type: "sawtooth" },
-                envelope: { attack: 0.01, decay: 0.2, sustain: 0.6, release: 0.3 }
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.001, decay: 0.02, sustain: 0.95, release: 0.05 }
             }).connect(masterVolume);
             
             const harmony = new Tone.Synth({
-                oscillator: { type: "triangle" },
-                envelope: { attack: 0.02, decay: 0.15, sustain: 0.4, release: 0.4 }
+                oscillator: { type: "square", modulationType: "square" },
+                envelope: { attack: 0.001, decay: 0.1, sustain: 0.7, release: 0.2 }
             }).connect(masterVolume);
             
-            // Fast-paced arcade melody (inspired by classic space shooters)
+            // Classic 80's arcade shooter melody - energetic and repetitive
             const leadPattern = [
-                "G4", "G4", "D5", "D5", "G4", "G4", "D5", "D5",
-                "F4", "F4", "C5", "C5", "F4", "F4", "C5", "C5",
-                "E4", "E4", "B4", "B4", "E4", "E4", "B4", "B4",
-                "F4", "F4", "C5", "C5", "G4", "G4", "D5", "D5"
+                "E5", "E5", "F5", "G5", "E5", "C5", "D5", "E5",
+                "F5", "F5", "G5", "A5", "F5", "D5", "E5", "F5",
+                "G5", "G5", "A5", "B5", "G5", "E5", "F5", "G5",
+                "A5", "G5", "F5", "E5", "D5", "C5", "E5", "C5"
             ];
             
             const bassPattern = [
-                "G2", null, "G2", null, "G2", null, "G2", null,
-                "F2", null, "F2", null, "F2", null, "F2", null,
-                "E2", null, "E2", null, "E2", null, "E2", null,
-                "F2", null, "F2", null, "G2", null, "G2", null
+                "C3", null, "C3", "C3", "G2", null, "G2", "G2",
+                "F2", null, "F2", "F2", "C3", null, "C3", "C3",
+                "A2", null, "A2", "A2", "F2", null, "F2", "F2",
+                "G2", null, "G2", "G2", "C3", "C3", "C3", null
             ];
             
             const harmonyPattern = [
-                "B3", "D4", "B3", "D4", "B3", "D4", "B3", "D4",
-                "A3", "C4", "A3", "C4", "A3", "C4", "A3", "C4",
-                "G3", "B3", "G3", "B3", "G3", "B3", "G3", "B3",
-                "A3", "C4", "A3", "C4", "B3", "D4", "B3", "D4"
+                "G4", null, "C4", null, "E4", null, "G4", null,
+                "A4", null, "D4", null, "F4", null, "A4", null,
+                "B4", null, "E4", null, "G4", null, "B4", null,
+                "C5", null, "F4", null, "A4", null, "C5", null
             ];
             
             const leadSeq = new Tone.Sequence((time, note) => {
-                if (note) lead.triggerAttackRelease(note, "16n", time);
+                if (note) lead.triggerAttackRelease(note, "8n", time);
             }, leadPattern, "8n");
             
             const bassSeq = new Tone.Sequence((time, note) => {
-                if (note) bass.triggerAttackRelease(note, "8n", time);
+                if (note) bass.triggerAttackRelease(note, "4n", time);
             }, bassPattern, "8n");
             
             const harmonySeq = new Tone.Sequence((time, note) => {
-                if (note) harmony.triggerAttackRelease(note, "16n", time);
-            }, harmonyPattern, "8n");
+                if (note) harmony.triggerAttackRelease(note, "8n", time);
+            }, harmonyPattern, "4n");
             
             backgroundMusic = {
                 start: () => {
-                    Tone.Transport.bpm.value = 140; // Faster tempo for arcade feel
+                    Tone.Transport.bpm.value = 140; // Fast-paced 80's arcade tempo
                     leadSeq.start(0);
                     bassSeq.start(0);
                     harmonySeq.start(0);
@@ -2508,37 +2508,37 @@
                 shoot: () => {
                     const synth = new Tone.Synth({
                         oscillator: { type: "square" },
-                        envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
+                        envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }
                     }).connect(masterVolume);
-                    synth.triggerAttackRelease("C5", "32n");
-                    setTimeout(() => synth.dispose(), 200);
+                    synth.triggerAttackRelease("C6", "32n");
+                    setTimeout(() => synth.dispose(), 100);
                 },
                 answerShoot: () => {
                     const synth = new Tone.Synth({
-                        oscillator: { type: "triangle" },
-                        envelope: { attack: 0.01, decay: 0.15, sustain: 0, release: 0.15 }
+                        oscillator: { type: "square" },
+                        envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.08 }
                     }).connect(masterVolume);
                     synth.triggerAttackRelease("G5", "16n");
-                    setTimeout(() => synth.dispose(), 300);
+                    setTimeout(() => synth.dispose(), 150);
                 },
                 correctAnswer: () => {
                     const synth = new Tone.Synth({
-                        oscillator: { type: "sine" },
-                        envelope: { attack: 0.01, decay: 0.15, sustain: 0, release: 0.15 }
+                        oscillator: { type: "square" },
+                        envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 }
                     }).connect(masterVolume);
                     synth.triggerAttackRelease("C5", "16n");
-                    setTimeout(() => synth.triggerAttackRelease("E5", "16n"), 60);
-                    setTimeout(() => synth.triggerAttackRelease("G5", "8n"), 120);
-                    setTimeout(() => synth.dispose(), 300);
+                    setTimeout(() => synth.triggerAttackRelease("E5", "16n"), 50);
+                    setTimeout(() => synth.triggerAttackRelease("G5", "8n"), 100);
+                    setTimeout(() => synth.dispose(), 200);
                 },
                 wrongAnswer: () => {
                     const synth = new Tone.Synth({
                         oscillator: { type: "square" },
-                        envelope: { attack: 0.01, decay: 0.15, sustain: 0, release: 0.15 }
+                        envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 }
                     }).connect(masterVolume);
                     synth.triggerAttackRelease("F3", "8n");
-                    setTimeout(() => synth.triggerAttackRelease("C3", "8n"), 80);
-                    setTimeout(() => synth.dispose(), 250);
+                    setTimeout(() => synth.triggerAttackRelease("C3", "8n"), 60);
+                    setTimeout(() => synth.dispose(), 180);
                 },
                 enemyHit: () => {
                     const noise = new Tone.Noise("white").connect(masterVolume);
