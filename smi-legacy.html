@@ -597,9 +597,9 @@
             updateUI();
         }
         
-        function startGame() {
+        async function startGame() {
             if (!audioInitialized) {
-                initAudio();
+                await initAudio();
             }
             
             gameState = 'playing';
@@ -621,13 +621,13 @@
             requestAnimationFrame(gameLoop);
         }
         
-        function restartGame() {
+        async function restartGame() {
             // Remove victory screen if it exists
             const victoryScreen = document.getElementById('victoryScreen');
             if (victoryScreen) {
                 victoryScreen.remove();
             }
-            startGame();
+            await startGame();
         }
         
         function pauseGame() {

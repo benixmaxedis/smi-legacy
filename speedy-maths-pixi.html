@@ -2202,9 +2202,9 @@
             document.getElementById('divWeaponLevel').textContent = weaponPowerLevels.div;
         }
         
-        function startGame() {
+        async function startGame() {
             if (!audioInitialized) {
-                initAudio();
+                await initAudio();
             }
             
             gameState = 'playing';
@@ -2414,8 +2414,8 @@
             updateUI();
         }
         
-        function restartGame() {
-            startGame();
+        async function restartGame() {
+            await startGame();
         }
         
         function closeShop() {
