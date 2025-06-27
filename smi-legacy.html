@@ -1427,11 +1427,26 @@
                 let missileHit = false;
                 
                 // Check collision with math enemies
-                for (let eIndex = 0; eIndex < mathEnemies.length; eIndex++) {
+                for (let eIndex = mathEnemies.length - 1; eIndex >= 0; eIndex--) {
                     const enemy = mathEnemies[eIndex];
                     if (getDistance(missile, enemy) < 25) {
                         missiles.splice(mIndex, 1);
+                        mathEnemies.splice(eIndex, 1);
+                        
+                        // Award points and update kill tracking
+                        score += 15; // Points for hitting math enemy with plasma
+                        mathEnemiesKilled++;
+                        
+                        // Update UI
+                        updateUI();
+                        updateKillCounter();
+                        
                         createExplosion(missile.x, missile.y, [0, 212, 255]);
+                        
+                        if (sounds.enemyHit) {
+                            sounds.enemyHit();
+                        }
+                        
                         missileHit = true;
                         break;
                     }

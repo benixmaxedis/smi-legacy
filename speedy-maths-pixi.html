@@ -2542,54 +2542,52 @@
                 }
             };
             
+            // Create shared synthesizers to prevent memory leaks
+            const sharedSynths = {
+                shoot: new Tone.Synth({
+                    oscillator: { type: "square" },
+                    envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }
+                }).connect(masterVolume),
+                
+                answerShoot: new Tone.Synth({
+                    oscillator: { type: "square" },
+                    envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.08 }
+                }).connect(masterVolume),
+                
+                melody: new Tone.Synth({
+                    oscillator: { type: "square" },
+                    envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 }
+                }).connect(masterVolume),
+                
+                noise: new Tone.Noise("white").connect(masterVolume)
+            };
+            
             sounds = {
                 shoot: () => {
-                    const synth = new Tone.Synth({
-                        oscillator: { type: "square" },
-                        envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }
-                    }).connect(masterVolume);
-                    synth.triggerAttackRelease("C6", "32n");
-                    setTimeout(() => synth.dispose(), 100);
+                    sharedSynths.shoot.triggerAttackRelease("C6", "32n");
                 },
                 answerShoot: () => {
-                    const synth = new Tone.Synth({
-                        oscillator: { type: "square" },
-                        envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.08 }
-                    }).connect(masterVolume);
-                    synth.triggerAttackRelease("G5", "16n");
-                    setTimeout(() => synth.dispose(), 150);
+                    sharedSynths.answerShoot.triggerAttackRelease("G5", "16n");
                 },
                 correctAnswer: () => {
-                    const synth = new Tone.Synth({
-                        oscillator: { type: "square" },
-                        envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 }
-                    }).connect(masterVolume);
-                    synth.triggerAttackRelease("C5", "16n");
-                    setTimeout(() => synth.triggerAttackRelease("E5", "16n"), 50);
-                    setTimeout(() => synth.triggerAttackRelease("G5", "8n"), 100);
-                    setTimeout(() => synth.dispose(), 200);
+                    sharedSynths.melody.triggerAttackRelease("C5", "16n");
+                    setTimeout(() => sharedSynths.melody.triggerAttackRelease("E5", "16n"), 50);
+                    setTimeout(() => sharedSynths.melody.triggerAttackRelease("G5", "8n"), 100);
                 },
                 wrongAnswer: () => {
-                    const synth = new Tone.Synth({
-                        oscillator: { type: "square" },
-                        envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 }
-                    }).connect(masterVolume);
-                    synth.triggerAttackRelease("F3", "8n");
-                    setTimeout(() => synth.triggerAttackRelease("C3", "8n"), 60);
-                    setTimeout(() => synth.dispose(), 180);
+                    sharedSynths.melody.triggerAttackRelease("F3", "8n");
+                    setTimeout(() => sharedSynths.melody.triggerAttackRelease("C3", "8n"), 60);
                 },
                 enemyHit: () => {
-                    const noise = new Tone.Noise("white").connect(masterVolume);
                     const env = new Tone.AmplitudeEnvelope({
                         attack: 0.01, decay: 0.1, sustain: 0, release: 0.1
                     }).connect(masterVolume);
-                    noise.connect(env);
+                    sharedSynths.noise.connect(env);
                     env.triggerAttackRelease("8n");
-                    noise.start();
+                    sharedSynths.noise.start();
                     setTimeout(() => {
-                        noise.stop();
-                        noise.dispose();
-                        env.dispose();
+                        sharedSynths.noise.stop();
+                        env.dispose(); // Only dispose the envelope, keep noise synth
                     }, 150);
                 }
             };
