@@ -1421,33 +1421,51 @@
                 return true;
             });
             
-            missiles.forEach((missile, mIndex) => {
-                mathEnemies.forEach((enemy, eIndex) => {
+            // Use reverse loop to safely modify missiles array during iteration
+            for (let mIndex = missiles.length - 1; mIndex >= 0; mIndex--) {
+                const missile = missiles[mIndex];
+                let missileHit = false;
+                
+                // Check collision with math enemies
+                for (let eIndex = 0; eIndex < mathEnemies.length; eIndex++) {
+                    const enemy = mathEnemies[eIndex];
                     if (getDistance(missile, enemy) < 25) {
                         missiles.splice(mIndex, 1);
                         createExplosion(missile.x, missile.y, [0, 212, 255]);
+                        missileHit = true;
+                        break;
                     }
-                });
+                }
                 
-                formationEnemies.forEach((enemy, eIndex) => {
-                    if (getDistance(missile, enemy) < 20) {
-                        missiles.splice(mIndex, 1);
-                        formationEnemies.splice(eIndex, 1);
-                        formationEnemiesKilled++;
-                        score += 5;
-                        updateUI();
-                        updateKillCounter();
-                        createExplosion(enemy.x, enemy.y, [100, 200, 255]);
-                        
-                        if (sounds.enemyHit) {
-                            sounds.enemyHit();
+                // Check collision with formation enemies (only if missile wasn't already hit)
+                if (!missileHit) {
+                    for (let eIndex = formationEnemies.length - 1; eIndex >= 0; eIndex--) {
+                        const enemy = formationEnemies[eIndex];
+                        if (getDistance(missile, enemy) < 20) {
+                            missiles.splice(mIndex, 1);
+                            formationEnemies.splice(eIndex, 1);
+                            formationEnemiesKilled++;
+                            score += 5;
+                            updateUI();
+                            updateKillCounter();
+                            createExplosion(enemy.x, enemy.y, [100, 200, 255]);
+                            
+                            if (sounds.enemyHit) {
+                                sounds.enemyHit();
+                            }
+                            break;
                         }
                     }
-                });
-            });
+                }
+            }
             
-            answerMissiles.forEach((missile, mIndex) => {
-                mathEnemies.forEach((enemy, eIndex) => {
+            // Use reverse loop to safely modify answerMissiles array during iteration
+            for (let mIndex = answerMissiles.length - 1; mIndex >= 0; mIndex--) {
+                const missile = answerMissiles[mIndex];
+                
+                // Use reverse loop for mathEnemies to safely remove enemies during iteration
+                for (let eIndex = mathEnemies.length - 1; eIndex >= 0; eIndex--) {
+                    const enemy = mathEnemies[eIndex];
                     if (getDistance(missile, enemy) < 30) {
                         answerMissiles.splice(mIndex, 1);
                         
@@ -1492,9 +1510,10 @@
                                 sounds.wrongAnswer();
                             }
                         }
+                        break; // Exit inner loop since missile was removed
                     }
-                });
-            });
+                }
+            }
             
             particles = particles.filter(particle => {
                 particle.x += particle.vx;
@@ -1529,6 +1548,9 @@
                 // Remove missiles that go off screen
                 return missile.y < canvas.height + 10;
             });
+            
+            // Check for level progression
+            checkLevelTransition();
         }
         
         function draw() {

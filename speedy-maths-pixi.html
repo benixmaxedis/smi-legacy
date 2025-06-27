@@ -1729,40 +1729,44 @@
             }
             
             
-            // Update missiles
-            missiles.forEach((missile, index) => {
+            // Update missiles - Use reverse loop to safely remove off-screen missiles
+            for (let i = missiles.length - 1; i >= 0; i--) {
+                const missile = missiles[i];
                 missile.y -= missile.speed;
                 if (missile.y < -20) {
                     gameObjectsContainer.removeChild(missile);
-                    missiles.splice(index, 1);
+                    missiles.splice(i, 1);
                 }
-            });
+            }
             
-            // Update answer missiles
-            answerMissiles.forEach((missile, index) => {
+            // Update answer missiles - Use reverse loop to safely remove off-screen missiles
+            for (let i = answerMissiles.length - 1; i >= 0; i--) {
+                const missile = answerMissiles[i];
                 missile.y -= missile.speed;
                 if (missile.y < -20) {
                     gameObjectsContainer.removeChild(missile);
-                    answerMissiles.splice(index, 1);
+                    answerMissiles.splice(i, 1);
                 }
-            });
+            }
             
-            // Update enemies
-            mathEnemies.forEach((enemy, index) => {
+            // Update enemies - Use reverse loop to safely remove off-screen enemies
+            for (let i = mathEnemies.length - 1; i >= 0; i--) {
+                const enemy = mathEnemies[i];
                 enemy.y += enemy.speed;
                 if (enemy.y > app.screen.height + 50) {
                     gameObjectsContainer.removeChild(enemy);
-                    mathEnemies.splice(index, 1);
+                    mathEnemies.splice(i, 1);
                     lives--;
                     updateUI();
                     if (lives <= 0) {
                         endGame();
                     }
                 }
-            });
+            }
             
-            // Update formation enemies with looping patterns
-            formationEnemies.forEach((enemy, index) => {
+            // Update formation enemies with looping patterns - Use reverse loop for safe array modification
+            for (let i = formationEnemies.length - 1; i >= 0; i--) {
+                const enemy = formationEnemies[i];
                 enemy.angle += 0.03; // Animation speed
                 
                 switch(enemy.movementType) {
@@ -1794,14 +1798,14 @@
                 if (enemy.centerY > app.screen.height + 100 || 
                     enemy.x < -100 || enemy.x > app.screen.width + 100) {
                     gameObjectsContainer.removeChild(enemy);
-                    formationEnemies.splice(index, 1);
+                    formationEnemies.splice(i, 1);
                     lives--;
                     updateUI();
                     if (lives <= 0) {
                         endGame();
                     }
                 }
-            });
+            }
             
             // Update coins
             coins_sprites.forEach((coin, index) => {
@@ -1937,21 +1941,34 @@
         
         function checkCollisions() {
             // Missile vs math enemies
-            missiles.forEach((missile, mIndex) => {
-                mathEnemies.forEach((enemy, eIndex) => {
+            // Use reverse loop to safely modify missiles array during iteration
+            for (let mIndex = missiles.length - 1; mIndex >= 0; mIndex--) {
+                const missile = missiles[mIndex];
+                let missileHit = false;
+                
+                for (let eIndex = 0; eIndex < mathEnemies.length; eIndex++) {
+                    const enemy = mathEnemies[eIndex];
                     const distance = Math.sqrt(Math.pow(missile.x - enemy.x, 2) + Math.pow(missile.y - enemy.y, 2));
                     if (distance < 25) {
                         gameObjectsContainer.removeChild(missile);
                         missiles.splice(mIndex, 1);
                         createExplosion(missile.x, missile.y, 0x00d4ff);
+                        missileHit = true;
                         // Math enemies are damaged but not destroyed by regular missiles
+                        break;
                     }
-                });
-            });
+                }
+                
+                if (missileHit) continue; // Skip to next missile if this one was destroyed
+            }
             
-            // Missile vs formation enemies
-            missiles.forEach((missile, mIndex) => {
-                formationEnemies.forEach((enemy, eIndex) => {
+            // Missile vs formation enemies - Use reverse loops to safely modify arrays
+            for (let mIndex = missiles.length - 1; mIndex >= 0; mIndex--) {
+                const missile = missiles[mIndex];
+                let missileHit = false;
+                
+                for (let eIndex = formationEnemies.length - 1; eIndex >= 0; eIndex--) {
+                    const enemy = formationEnemies[eIndex];
                     const distance = Math.sqrt(Math.pow(missile.x - enemy.x, 2) + Math.pow(missile.y - enemy.y, 2));
                     if (distance < 20) {
                         gameObjectsContainer.removeChild(missile);
@@ -1973,13 +1990,21 @@
                         levelStats.enemiesKilled++;
                         enemiesKilledThisLevel++;
                         checkLevelComplete();
+                        missileHit = true;
+                        break;
                     }
-                });
-            });
+                }
+                
+                if (missileHit) continue; // Skip to next missile if this one was destroyed
+            }
             
-            // Missile vs bosses
-            missiles.forEach((missile, mIndex) => {
-                bosses.forEach((boss, bIndex) => {
+            // Missile vs bosses - Use reverse loop to safely modify arrays
+            for (let mIndex = missiles.length - 1; mIndex >= 0; mIndex--) {
+                const missile = missiles[mIndex];
+                let missileHit = false;
+                
+                for (let bIndex = 0; bIndex < bosses.length; bIndex++) {
+                    const boss = bosses[bIndex];
                     const distance = Math.sqrt(Math.pow(missile.x - boss.x, 2) + Math.pow(missile.y - boss.y, 2));
                     if (distance < 45) {
                         gameObjectsContainer.removeChild(missile);
@@ -1987,17 +2012,26 @@
                         boss.health -= 1;
                         createExplosion(missile.x, missile.y, 0xff8800);
                         if (sounds.enemyHit) sounds.enemyHit();
+                        missileHit = true;
+                        break;
                     }
-                });
-            });
+                }
+                
+                if (missileHit) continue; // Skip to next missile if this one was destroyed
+            }
             
-            // Answer missile vs math enemies
-            answerMissiles.forEach((missile, mIndex) => {
-                mathEnemies.forEach((enemy, eIndex) => {
+            // Answer missile vs math enemies - Use reverse loops to safely modify arrays
+            for (let mIndex = answerMissiles.length - 1; mIndex >= 0; mIndex--) {
+                const missile = answerMissiles[mIndex];
+                let missileHit = false;
+                
+                for (let eIndex = mathEnemies.length - 1; eIndex >= 0; eIndex--) {
+                    const enemy = mathEnemies[eIndex];
                     const distance = Math.sqrt(Math.pow(missile.x - enemy.x, 2) + Math.pow(missile.y - enemy.y, 2));
                     if (distance < 30) {
                         gameObjectsContainer.removeChild(missile);
                         answerMissiles.splice(mIndex, 1);
+                        missileHit = true;
                         
                         if (missile.answer === enemy.answer) {
                             gameObjectsContainer.removeChild(enemy);
@@ -2050,12 +2084,16 @@
                             
                             levelStats.totalAnswers++;
                         }
+                        break;
                     }
-                });
-            });
+                }
+                
+                if (missileHit) continue; // Skip to next missile if this one was destroyed
+            }
             
-            // Enemy missiles vs player
-            enemyMissiles.forEach((missile, mIndex) => {
+            // Enemy missiles vs player - Use reverse loop to safely modify array
+            for (let mIndex = enemyMissiles.length - 1; mIndex >= 0; mIndex--) {
+                const missile = enemyMissiles[mIndex];
                 const distance = Math.sqrt(Math.pow(missile.x - player.x, 2) + Math.pow(missile.y - player.y, 2));
                 if (distance < 25) {
                     gameObjectsContainer.removeChild(missile);
@@ -2076,7 +2114,7 @@
                         }
                     }
                 }
-            });
+            }
             
             // Update enemy missiles
             enemyMissiles.forEach((missile, index) => {
