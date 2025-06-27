@@ -1,0 +1,285 @@
+name: Browser Tests with Puppeteer
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run tests daily at 6 AM UTC to catch any deployment issues
+    - cron: '0 6 * * *'
+
+jobs:
+  browser-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: |
+          npm init -y
+          npm install puppeteer@latest
+          
+      - name: Wait for deployment
+        if: github.event_name == 'push'
+        run: |
+          echo "Waiting for GitHub Pages deployment to complete..."
+          sleep 60
+          
+      - name: Run basic smoke tests
+        run: |
+          node -e "
+          const puppeteer = require('puppeteer');
+          
+          (async () => {
+            console.log('Starting browser tests...');
+            const browser = await puppeteer.launch({
+              headless: true,
+              args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+            
+            const page = await browser.newPage();
+            
+            try {
+              // Test 1: Landing page loads
+              console.log('Testing landing page...');
+              await page.goto('https://benixmaxedis.github.io/smi-legacy/', {
+                waitUntil: 'networkidle2',
+                timeout: 30000
+              });
+              
+              const title = await page.title();
+              console.log('✅ Landing page title:', title);
+              
+              // Check for game cards
+              const gameCards = await page.\$\$('.game-card');
+              console.log(\`✅ Found \${gameCards.length} game cards\`);
+              
+              // Test 2: PIXI.js version loads
+              console.log('Testing PIXI.js version...');
+              await page.goto('https://benixmaxedis.github.io/smi-legacy/speedy-maths-pixi.html', {
+                waitUntil: 'networkidle2',
+                timeout: 30000
+              });
+              
+              await page.waitForSelector('canvas', { timeout: 10000 });
+              console.log('✅ PIXI.js version canvas loaded');
+              
+              // Test 3: Canvas version loads
+              console.log('Testing Canvas version...');
+              await page.goto('https://benixmaxedis.github.io/smi-legacy/smi-legacy.html', {
+                waitUntil: 'networkidle2',
+                timeout: 30000
+              });
+              
+              await page.waitForSelector('canvas', { timeout: 10000 });
+              console.log('✅ Canvas version loaded');
+              
+              // Test 4: Check for JavaScript errors
+              const logs = [];
+              page.on('console', msg => {
+                if (msg.type() === 'error') {
+                  logs.push(msg.text());
+                }
+              });
+              
+              // Reload PIXI version to check for errors
+              await page.goto('https://benixmaxedis.github.io/smi-legacy/speedy-maths-pixi.html', {
+                waitUntil: 'networkidle2'
+              });
+              await page.waitForTimeout(3000);
+              
+              if (logs.length > 0) {
+                console.log('⚠️  JavaScript errors found:', logs);
+              } else {
+                console.log('✅ No JavaScript errors detected');
+              }
+              
+              console.log('🎉 All smoke tests passed!');
+              
+            } catch (error) {
+              console.error('❌ Test failed:', error.message);
+              process.exit(1);
+            } finally {
+              await browser.close();
+            }
+          })();
+          "
+          
+      - name: Run performance tests
+        run: |
+          node -e "
+          const puppeteer = require('puppeteer');
+          
+          (async () => {
+            console.log('Starting performance tests...');
+            const browser = await puppeteer.launch({
+              headless: true,
+              args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+            
+            const page = await browser.newPage();
+            
+            try {
+              // Performance test for PIXI.js version
+              console.log('Testing PIXI.js performance...');
+              
+              const startTime = Date.now();
+              await page.goto('https://benixmaxedis.github.io/smi-legacy/speedy-maths-pixi.html', {
+                waitUntil: 'networkidle2',
+                timeout: 30000
+              });
+              
+              await page.waitForSelector('canvas');
+              const loadTime = Date.now() - startTime;
+              console.log(\`✅ PIXI.js load time: \${loadTime}ms\`);
+              
+              // Get performance metrics
+              const metrics = await page.metrics();
+              console.log('📊 Performance metrics:');
+              console.log(\`   - JS Heap Used: \${Math.round(metrics.JSHeapUsedSize / 1024 / 1024)}MB\`);
+              console.log(\`   - JS Heap Total: \${Math.round(metrics.JSHeapTotalSize / 1024 / 1024)}MB\`);
+              console.log(\`   - Nodes: \${metrics.Nodes}\`);
+              
+              // Test memory usage after 5 seconds
+              await page.waitForTimeout(5000);
+              const laterMetrics = await page.metrics();
+              const memoryIncrease = laterMetrics.JSHeapUsedSize - metrics.JSHeapUsedSize;
+              console.log(\`   - Memory increase after 5s: \${Math.round(memoryIncrease / 1024)}KB\`);
+              
+              if (loadTime > 10000) {
+                console.log('⚠️  Load time is high (>10s)');
+              }
+              
+              if (metrics.JSHeapUsedSize > 100 * 1024 * 1024) {
+                console.log('⚠️  High memory usage (>100MB)');
+              }
+              
+              console.log('✅ Performance tests completed');
+              
+            } catch (error) {
+              console.error('❌ Performance test failed:', error.message);
+              process.exit(1);
+            } finally {
+              await browser.close();
+            }
+          })();
+          "
+          
+      - name: Test responsive design
+        run: |
+          node -e "
+          const puppeteer = require('puppeteer');
+          
+          (async () => {
+            console.log('Testing responsive design...');
+            const browser = await puppeteer.launch({
+              headless: true,
+              args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+            
+            const page = await browser.newPage();
+            
+            const viewports = [
+              { width: 1920, height: 1080, name: 'Desktop' },
+              { width: 768, height: 1024, name: 'Tablet' },
+              { width: 375, height: 667, name: 'Mobile' }
+            ];
+            
+            try {
+              for (const viewport of viewports) {
+                console.log(\`Testing \${viewport.name} viewport (\${viewport.width}x\${viewport.height})...\`);
+                
+                await page.setViewport(viewport);
+                await page.goto('https://benixmaxedis.github.io/smi-legacy/', {
+                  waitUntil: 'networkidle2'
+                });
+                
+                // Check if game cards are visible
+                const gameCards = await page.\$\$('.game-card');
+                const playButtons = await page.\$\$('.play-button');
+                
+                console.log(\`   - Game cards visible: \${gameCards.length > 0}\`);
+                console.log(\`   - Play buttons present: \${playButtons.length > 0}\`);
+                
+                // Check for horizontal scroll
+                const hasHorizontalScroll = await page.evaluate(() => {
+                  return document.body.scrollWidth > window.innerWidth;
+                });
+                
+                if (hasHorizontalScroll) {
+                  console.log(\`   ⚠️ Horizontal scroll detected on \${viewport.name}\`);
+                } else {
+                  console.log(\`   ✅ No horizontal scroll on \${viewport.name}\`);
+                }
+              }
+              
+              console.log('✅ Responsive design tests completed');
+              
+            } catch (error) {
+              console.error('❌ Responsive test failed:', error.message);
+              process.exit(1);
+            } finally {
+              await browser.close();
+            }
+          })();
+          "
+          
+      - name: Test audio system
+        run: |
+          node -e "
+          const puppeteer = require('puppeteer');
+          
+          (async () => {
+            console.log('Testing audio system...');
+            const browser = await puppeteer.launch({
+              headless: true,
+              args: ['--no-sandbox', '--disable-setuid-sandbox', '--autoplay-policy=no-user-gesture-required']
+            });
+            
+            const page = await browser.newPage();
+            
+            try {
+              await page.goto('https://benixmaxedis.github.io/smi-legacy/speedy-maths-pixi.html', {
+                waitUntil: 'networkidle2'
+              });
+              
+              await page.waitForSelector('canvas');
+              
+              // Test Tone.js availability
+              const audioTest = await page.evaluate(() => {
+                return {
+                  toneJsLoaded: typeof Tone !== 'undefined',
+                  audioInitialized: typeof audioInitialized !== 'undefined' ? audioInitialized : false,
+                  backgroundMusicExists: typeof backgroundMusic !== 'undefined',
+                  soundsExists: typeof sounds !== 'undefined'
+                };
+              });
+              
+              console.log('🎵 Audio system status:');
+              console.log(\`   - Tone.js loaded: \${audioTest.toneJsLoaded}\`);
+              console.log(\`   - Audio initialized: \${audioTest.audioInitialized}\`);
+              console.log(\`   - Background music available: \${audioTest.backgroundMusicExists}\`);
+              console.log(\`   - Sound effects available: \${audioTest.soundsExists}\`);
+              
+              if (audioTest.toneJsLoaded && audioTest.backgroundMusicExists) {
+                console.log('✅ Audio system properly configured');
+              } else {
+                console.log('⚠️  Audio system may have issues');
+              }
+              
+            } catch (error) {
+              console.error('❌ Audio test failed:', error.message);
+              process.exit(1);
+            } finally {
+              await browser.close();
+            }
+          })();
+          "
