@@ -2437,42 +2437,42 @@
             
             const masterVolume = new Tone.Volume(-12).toDestination();
             
-            // Create arcade-style background music
+            // Create Golden Axe-style fantasy adventure music
             const lead = new Tone.Synth({
                 oscillator: { type: "square" },
-                envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 0.2 }
+                envelope: { attack: 0.02, decay: 0.15, sustain: 0.4, release: 0.3 }
             }).connect(masterVolume);
             
             const bass = new Tone.Synth({
                 oscillator: { type: "sawtooth" },
-                envelope: { attack: 0.01, decay: 0.2, sustain: 0.6, release: 0.3 }
+                envelope: { attack: 0.05, decay: 0.3, sustain: 0.7, release: 0.4 }
             }).connect(masterVolume);
             
             const harmony = new Tone.Synth({
                 oscillator: { type: "triangle" },
-                envelope: { attack: 0.02, decay: 0.15, sustain: 0.4, release: 0.4 }
+                envelope: { attack: 0.03, decay: 0.2, sustain: 0.5, release: 0.5 }
             }).connect(masterVolume);
             
-            // Fast-paced arcade melody (inspired by classic space shooters)
+            // Golden Axe Level 1 style epic fantasy adventure melody
             const leadPattern = [
-                "G4", "G4", "D5", "D5", "G4", "G4", "D5", "D5",
-                "F4", "F4", "C5", "C5", "F4", "F4", "C5", "C5",
-                "E4", "E4", "B4", "B4", "E4", "E4", "B4", "B4",
-                "F4", "F4", "C5", "C5", "G4", "G4", "D5", "D5"
+                "C4", "D4", "F4", "G4", "F4", "D4", "C4", "D4",
+                "F4", "G4", "A4", "C5", "A4", "G4", "F4", "G4",
+                "A4", "G4", "F4", "D4", "F4", "G4", "A4", "F4",
+                "G4", "F4", "D4", "C4", "D4", "F4", "G4", "F4"
             ];
             
             const bassPattern = [
-                "G2", null, "G2", null, "G2", null, "G2", null,
-                "F2", null, "F2", null, "F2", null, "F2", null,
-                "E2", null, "E2", null, "E2", null, "E2", null,
-                "F2", null, "F2", null, "G2", null, "G2", null
+                "C2", null, "C2", "C2", null, "C2", null, "C2",
+                "F2", null, "F2", "F2", null, "F2", null, "F2",
+                "G2", null, "G2", "G2", null, "G2", null, "G2",
+                "C2", null, "C2", "C2", null, "C2", null, "C2"
             ];
             
             const harmonyPattern = [
-                "B3", "D4", "B3", "D4", "B3", "D4", "B3", "D4",
-                "A3", "C4", "A3", "C4", "A3", "C4", "A3", "C4",
-                "G3", "B3", "G3", "B3", "G3", "B3", "G3", "B3",
-                "A3", "C4", "A3", "C4", "B3", "D4", "B3", "D4"
+                "G3", "C4", "E4", "G4", "E4", "C4", "G3", "C4",
+                "A3", "F4", "C4", "A4", "C4", "F4", "A3", "F4",
+                "B3", "G4", "D4", "B4", "D4", "G4", "B3", "G4",
+                "G3", "C4", "E4", "G4", "E4", "C4", "G3", "C4"
             ];
             
             const leadSeq = new Tone.Sequence((time, note) => {
@@ -2489,7 +2489,7 @@
             
             backgroundMusic = {
                 start: () => {
-                    Tone.Transport.bpm.value = 140; // Faster tempo for arcade feel
+                    Tone.Transport.bpm.value = 120; // Epic tempo for fantasy adventure
                     leadSeq.start(0);
                     bassSeq.start(0);
                     harmonySeq.start(0);

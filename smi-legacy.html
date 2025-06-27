@@ -308,20 +308,20 @@
             // Create a volume control to prevent audio glitches
             const masterVolume = new Tone.Volume(-8).toDestination();
             
-            // Enhanced Game of Thrones intro style orchestral arrangement
+            // Golden Axe Level 1 style epic fantasy adventure music
             const strings = new Tone.Synth({
-                oscillator: { type: "sawtooth" },
-                envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 1.2 }
+                oscillator: { type: "square" },
+                envelope: { attack: 0.02, decay: 0.15, sustain: 0.4, release: 0.3 }
             }).connect(masterVolume);
             
             const brass = new Tone.Synth({
-                oscillator: { type: "square" },
-                envelope: { attack: 0.1, decay: 0.1, sustain: 0.9, release: 0.8 }
+                oscillator: { type: "sawtooth" },
+                envelope: { attack: 0.05, decay: 0.3, sustain: 0.7, release: 0.4 }
             }).connect(masterVolume);
             
             const cellos = new Tone.Synth({
                 oscillator: { type: "triangle" },
-                envelope: { attack: 0.2, decay: 0.3, sustain: 0.6, release: 1.0 }
+                envelope: { attack: 0.03, decay: 0.2, sustain: 0.5, release: 0.5 }
             }).connect(masterVolume);
             
             const drums = new Tone.NoiseSynth({
@@ -329,39 +329,39 @@
                 envelope: { attack: 0.005, decay: 0.1, sustain: 0.0, release: 0.1 }
             }).connect(masterVolume);
             
-            // Authentic Game of Thrones main theme (simplified for web audio)
+            // Golden Axe Level 1 style epic fantasy adventure melody
             const gotMainTheme = [
-                "G3", "C4", "Eb4", "F4", "G4", "C4", "Eb4", "F4",
-                "G3", "C4", "Eb4", "F4", "G4", "G4", "F4", "Eb4",
-                "C4", "G3", "C4", "Eb4", "F4", "G4", "C4", "G3",
-                "G4", "C5", "Eb5", "F5", "G5", "C5", "Eb5", "F5" // Higher register
+                "C4", "D4", "F4", "G4", "F4", "D4", "C4", "D4",
+                "F4", "G4", "A4", "C5", "A4", "G4", "F4", "G4",
+                "A4", "G4", "F4", "D4", "F4", "G4", "A4", "F4",
+                "G4", "F4", "D4", "C4", "D4", "F4", "G4", "F4"
             ];
             
-            // String harmony with ascending motifs
+            // Harmony with epic medieval chord progressions
             const stringHarmony = [
-                "C3", "G3", "G3", "Ab3", "Bb3", "G3", "G3", "Ab3",
-                "C3", "G3", "G3", "Ab3", "Bb3", "Bb3", "Ab3", "G3",
-                "G3", "C3", "G3", "G3", "Ab3", "Bb3", "G3", "C3",
-                "C4", "G4", "G4", "Ab4", "Bb4", "G4", "G4", "Ab4" // Building intensity
+                "G3", "C4", "E4", "G4", "E4", "C4", "G3", "C4",
+                "A3", "F4", "C4", "A4", "C4", "F4", "A3", "F4",
+                "B3", "G4", "D4", "B4", "D4", "G4", "B3", "G4",
+                "G3", "C4", "E4", "G4", "E4", "C4", "G3", "C4"
             ];
             
-            // Deep cello bass line with dramatic timing
+            // Bass line with medieval progressions
             const celloBass = [
-                "C2", "C2", "G2", "F2", "G2", "C2", "C2", "F2",
-                "C2", "C2", "G2", "F2", "G2", "G2", "F2", "C2",
-                "C2", "G2", "C2", "C2", "F2", "G2", "C2", "C2",
-                "C1", "C2", "G2", "F2", "G2", "C2", "C2", "F2" // Adding low C1 for power
+                "C2", null, "C2", "C2", null, "C2", null, "C2",
+                "F2", null, "F2", "F2", null, "F2", null, "F2",
+                "G2", null, "G2", "G2", null, "G2", null, "G2",
+                "C2", null, "C2", "C2", null, "C2", null, "C2"
             ];
             
-            // Drum pattern for epicness
+            // Drum pattern for adventure rhythm
             const drumPattern = [
-                1, 0, 0, 1, 0, 0, 1, 0, // Strong-weak pattern
-                1, 0, 0, 1, 0, 1, 0, 1,
-                1, 0, 1, 0, 1, 0, 1, 0,
-                1, 1, 0, 1, 1, 0, 1, 1  // Building intensity
+                1, 0, 1, 0, 1, 0, 1, 0, // Steady adventure beat
+                1, 0, 1, 1, 0, 1, 0, 1,
+                1, 1, 0, 1, 1, 0, 1, 0,
+                1, 0, 1, 0, 1, 0, 1, 1
             ];
             
-            let currentTempo = 72; // Authentic GoT tempo
+            let currentTempo = 120; // Epic tempo for fantasy adventure
             
             const mainThemePattern = new Tone.Sequence((time, note) => {
                 strings.triggerAttackRelease(note, "4n", time);
