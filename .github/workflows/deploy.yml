@@ -1,0 +1,156 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Create deployment directory
+        run: |
+          mkdir -p _site
+          
+      - name: Copy game files
+        run: |
+          # Copy main game files
+          cp smi-legacy.html _site/
+          cp speedy-maths-pixi.html _site/
+          
+          # Copy Phaser game directory
+          cp -r phaser-invasion-game _site/
+          
+          # Create index.html for easy navigation
+          cat > _site/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Speedy Maths - Educational Space Shooter</title>
+              <style>
+                  body {
+                      font-family: Arial, sans-serif;
+                      max-width: 800px;
+                      margin: 0 auto;
+                      padding: 20px;
+                      background: linear-gradient(135deg, #1e3c72, #2a5298);
+                      color: white;
+                      min-height: 100vh;
+                  }
+                  .game-card {
+                      background: rgba(255, 255, 255, 0.1);
+                      border-radius: 10px;
+                      padding: 20px;
+                      margin: 20px 0;
+                      backdrop-filter: blur(10px);
+                      border: 1px solid rgba(255, 255, 255, 0.2);
+                  }
+                  .game-card h2 {
+                      color: #4CAF50;
+                      margin-top: 0;
+                  }
+                  .play-button {
+                      background: #4CAF50;
+                      color: white;
+                      padding: 12px 24px;
+                      text-decoration: none;
+                      border-radius: 5px;
+                      display: inline-block;
+                      margin: 10px 0;
+                      font-weight: bold;
+                      transition: background 0.3s;
+                  }
+                  .play-button:hover {
+                      background: #45a049;
+                  }
+                  .features {
+                      font-size: 14px;
+                      opacity: 0.9;
+                      margin: 10px 0;
+                  }
+                  h1 {
+                      text-align: center;
+                      color: #FFD700;
+                      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                  }
+              </style>
+          </head>
+          <body>
+              <h1>🚀 Speedy Maths - Educational Space Shooter 🎯</h1>
+              <p style="text-align: center; font-size: 18px;">Learn math while defending the galaxy! Choose your preferred game engine:</p>
+              
+              <div class="game-card">
+                  <h2>🎮 Enhanced PIXI.js Version</h2>
+                  <p>The most feature-rich version with advanced graphics, weapon systems, and comprehensive statistics.</p>
+                  <div class="features">
+                      ✨ WebGL-accelerated 2D rendering<br>
+                      🎵 80's arcade-style music with Tone.js<br>
+                      🛡️ Dynamic weapon system with upgrades<br>
+                      📊 Comprehensive learning analytics<br>
+                      🎨 Particle effects and visual polish
+                  </div>
+                  <a href="speedy-maths-pixi.html" class="play-button">Play Enhanced Version</a>
+              </div>
+              
+              <div class="game-card">
+                  <h2>📱 Original Canvas Version</h2>
+                  <p>Lightweight HTML5 Canvas implementation - perfect for older devices or slower connections.</p>
+                  <div class="features">
+                      🎯 Pure vanilla JavaScript<br>
+                      ⚡ Fast loading and minimal resources<br>
+                      🔧 Simple, focused gameplay<br>
+                      📈 Progressive difficulty scaling
+                  </div>
+                  <a href="smi-legacy.html" class="play-button">Play Original Version</a>
+              </div>
+              
+              <div class="game-card">
+                  <h2>🎲 Phaser.js Prototype</h2>
+                  <p>Experimental version built with the Phaser game framework - showcasing different engine capabilities.</p>
+                  <div class="features">
+                      🏗️ Scene-based architecture<br>
+                      🔄 Built-in physics engine<br>
+                      🎪 Framework exploration<br>
+                      🧪 Technology demonstration
+                  </div>
+                  <a href="phaser-invasion-game/index.html" class="play-button">Play Phaser Version</a>
+              </div>
+              
+              <div style="text-align: center; margin-top: 40px; opacity: 0.8;">
+                  <p>🎓 <strong>Educational Focus:</strong> Practice addition, subtraction, multiplication, and division while having fun!</p>
+                  <p>🎵 <strong>Audio:</strong> All versions feature procedurally generated sound effects and music using Tone.js</p>
+              </div>
+          </body>
+          </html>
+          EOF
+          
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
