@@ -302,8 +302,28 @@
         let backgroundMusic;
         let sounds = {};
         
-        function initAudio() {
+        // Utility function for safe DOM access
+        function safeUpdateElement(elementId, value, property = 'textContent') {
+            try {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element[property] = value;
+                } else {
+                    console.warn(`Element with ID '${elementId}' not found`);
+                }
+            } catch (error) {
+                console.error(`Error updating element '${elementId}':`, error);
+            }
+        }
+        
+        async function initAudio() {
             if (audioInitialized) return;
+            
+            try {
+                // Ensure Tone.js context is ready
+                if (Tone.context.state === 'suspended') {
+                    await Tone.start();
+                }
             
             // Create a volume control to prevent audio glitches
             const masterVolume = new Tone.Volume(-8).toDestination();
@@ -502,6 +522,27 @@
             };
             
             audioInitialized = true;
+            console.log('Audio system initialized successfully');
+            
+            } catch (error) {
+                console.error('Failed to initialize audio system:', error);
+                audioInitialized = false;
+                
+                // Create fallback silent sound functions  
+                sounds = {
+                    shoot: () => {},
+                    answerShoot: () => {},
+                    correctAnswer: () => {},
+                    wrongAnswer: () => {},
+                    enemyHit: () => {}
+                };
+                
+                // Create fallback silent background music
+                backgroundMusic = {
+                    start: () => {},
+                    stop: () => {}
+                };
+            }
         }
         
         function initStars() {

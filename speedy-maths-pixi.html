@@ -631,6 +631,20 @@
         let backgroundMusic;
         let sounds = {};
         
+        // Utility function for safe DOM access
+        function safeUpdateElement(elementId, value, property = 'textContent') {
+            try {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element[property] = value;
+                } else {
+                    console.warn(`Element with ID '${elementId}' not found`);
+                }
+            } catch (error) {
+                console.error(`Error updating element '${elementId}':`, error);
+            }
+        }
+        
         // Initialize PIXI Application
         function initPixi() {
             app = new PIXI.Application({
@@ -2470,10 +2484,16 @@
         }
         
         // Audio initialization with background music
-        function initAudio() {
+        async function initAudio() {
             if (audioInitialized) return;
             
-            const masterVolume = new Tone.Volume(-12).toDestination();
+            try {
+                // Ensure Tone.js context is ready
+                if (Tone.context.state === 'suspended') {
+                    await Tone.start();
+                }
+                
+                const masterVolume = new Tone.Volume(-12).toDestination();
             
             // 80's Arcade Style - Classic 8-bit sound chip synthesis
             const lead = new Tone.Synth({
@@ -2593,6 +2613,21 @@
             };
             
             audioInitialized = true;
+            console.log('Audio system initialized successfully');
+            
+            } catch (error) {
+                console.error('Failed to initialize audio system:', error);
+                audioInitialized = false;
+                
+                // Create fallback silent sound functions
+                sounds = {
+                    shoot: () => {},
+                    answerShoot: () => {},
+                    correctAnswer: () => {},
+                    wrongAnswer: () => {},
+                    enemyHit: () => {}
+                };
+            }
         }
         
         // Event listeners
