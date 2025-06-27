@@ -15,7 +15,8 @@
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
       "Bash(gh workflow run:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "WebFetch(domain:benixmaxedis.github.io)"
     ],
     "deny": []
   }
