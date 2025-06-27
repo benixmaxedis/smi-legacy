@@ -38,8 +38,10 @@ jobs:
           cp smi-legacy.html _site/
           cp speedy-maths-pixi.html _site/
           
-          # Copy Phaser game directory
-          cp -r phaser-invasion-game _site/
+          # Copy Phaser game directory if it exists
+          if [ -d "phaser-invasion-game" ]; then
+            cp -r phaser-invasion-game _site/
+          fi
           
           # Create index.html for easy navigation
           cat > _site/index.html << 'EOF'
@@ -126,17 +128,6 @@ jobs:
                   <a href="smi-legacy.html" class="play-button">Play Original Version</a>
               </div>
               
-              <div class="game-card">
-                  <h2>🎲 Phaser.js Prototype</h2>
-                  <p>Experimental version built with the Phaser game framework - showcasing different engine capabilities.</p>
-                  <div class="features">
-                      🏗️ Scene-based architecture<br>
-                      🔄 Built-in physics engine<br>
-                      🎪 Framework exploration<br>
-                      🧪 Technology demonstration
-                  </div>
-                  <a href="phaser-invasion-game/index.html" class="play-button">Play Phaser Version</a>
-              </div>
               
               <div style="text-align: center; margin-top: 40px; opacity: 0.8;">
                   <p>🎓 <strong>Educational Focus:</strong> Practice addition, subtraction, multiplication, and division while having fun!</p>
